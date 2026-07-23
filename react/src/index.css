@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+:root {
+  --font-ui: 'Nunito', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --transition: 200ms cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="light"] {
+  --bg:          #FDF8F2;
+  --bg-card:     #FFFFFF;
+  --bg-subtle:   #F5EEE4;
+  --bg-input:    #FFFCF8;
+  --text:        #1C1714;
+  --text-2:      #6B5E52;
+  --text-3:      #A89480;
+  --border:      #E8DDD2;
+  --accent:      #D97706;
+  --accent-h:    #B45309;
+  --accent-soft: #FEF3C7;
+  --accent-txt:  #92400E;
+  --brand:       #1E4D6B;
+  --avail:       #059669;
+  --avail-bg:    #ECFDF5;
+  --unavail:     #DC2626;
+  --unavail-bg:  #FEF2F2;
+  --shadow-sm:   0 1px 4px rgba(28,23,20,.06), 0 2px 8px rgba(28,23,20,.04);
+  --shadow-md:   0 4px 16px rgba(28,23,20,.10), 0 1px 4px rgba(28,23,20,.06);
+  --shadow-lg:   0 8px 32px rgba(28,23,20,.14), 0 2px 8px rgba(28,23,20,.06);
+  --nav-bg:      rgba(253,248,242,.92);
+  --chip-pending-bg: #FEF3C7;
+  --chip-pending-tx: #92400E;
+  --chip-dipinjam-bg: #DBEAFE;
+  --chip-dipinjam-tx: #1E40AF;
+}
+
+[data-theme="dark"] {
+  --bg:          #0C1220;
+  --bg-card:     #152030;
+  --bg-subtle:   #1C2D3F;
+  --bg-input:    #0F1A28;
+  --text:        #F0EBE3;
+  --text-2:      #8DA0B5;
+  --text-3:      #4E6278;
+  --border:      #1E2F42;
+  --accent:      #F59E0B;
+  --accent-h:    #FCD34D;
+  --accent-soft: #1C160A;
+  --accent-txt:  #FDE68A;
+  --brand:       #60A5FA;
+  --avail:       #34D399;
+  --avail-bg:    rgba(52,211,153,.12);
+  --unavail:     #F87171;
+  --unavail-bg:  rgba(248,113,113,.12);
+  --shadow-sm:   0 1px 4px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.2);
+  --shadow-md:   0 4px 16px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.3);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.4);
+  --nav-bg:      rgba(12,18,32,.95);
+  --chip-pending-bg: rgba(245,158,11,.15);
+  --chip-pending-tx: #FCD34D;
+  --chip-dipinjam-bg: rgba(96,165,250,.15);
+  --chip-dipinjam-tx: #93C5FD;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+  line-height: 1.5;
+}

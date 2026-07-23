@@ -1,0 +1,45 @@
+# ── Materi akademik & dokumen Penulisan Ilmiah (tidak dipublikasikan) ──
+docs/
+dafpus/
+.planning/
+figma/
+CLAUDE.md
+*.docx
+~$*
+
+# ── Folder sisa scaffolding (kosong, tidak direferensikan kode) ──
+uploads/
+
+# ── Tooling agen ──
+.claude/
+
+# ── Node / React ──
+node_modules/
+dist/
+build/
+*.local
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+python/**/models/
+*.joblib
+
+# ── Env & rahasia ──
+.env
+.env.*
+!.env.example
+
+# ── Editor & OS ──
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Log ──
+*.log
+npm-debug.log*

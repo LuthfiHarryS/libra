@@ -1,0 +1,123 @@
+"""
+app.py — Flask chatbot service entry point.
+
+Port: 5001 (terpisah dari CBF port 5000, per D-01)
+Startup: load_or_train() di module-level — BUKAN before_first_request (dihapus Flask 3.0)
+
+Endpoints:
+  GET  /health  — health check (D-08)
+  POST /chat    — intent classification + reply (D-02, CHAT-01)
+  POST /train   — retrain + save models, returns accuracy (D-09, CHAT-05)
+                  Requires X-Train-Key header matching CHATBOT_TRAIN_KEY env var.
+
+CORS: whitelist React dev origin (bukan wildcard *)
+Auth /chat: None — intranet sekolah (D-09)
+Auth /train: shared secret via X-Train-Key header
+"""
+import os
+
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from pydantic import BaseModel, field_validator, ValidationError
+
+from classifier import load_or_train, predict_intent, train_and_save
+from dataset import get_training_data, REPLIES
+
+app = Flask(__name__)
+CORS(app, origins=[
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:5173',
+])
+
+# Shared secret untuk endpoint /train. Set via env var sebelum start Flask.
+# Kalau env var tidak di-set, /train auto-block (return 503) — fail-secure.
+TRAIN_KEY = os.environ.get('CHATBOT_TRAIN_KEY', '')
+
+# Module-level initialization — Flask 3.x pattern (no before_first_request)
+# Load joblib jika ada, else train dari dataset.py dan simpan
+vectorizer, clf_lsvc, clf_nb, *_ = load_or_train(get_training_data())
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+    @field_validator('message')
+    @classmethod
+    def message_not_empty(cls, v):
+        if not v.strip():
+            raise ValueError('message cannot be empty')
+        return v.strip()
+
+
+@app.route('/health')
+def health():
+    """Health check — D-08: returns {"status": "ok"}."""
+    return jsonify({"status": "ok"})
+
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    """
+    Klasifikasi intent pesan Bahasa Indonesia.
+
+    Request:  {"message": "..."}
+    Response: {"intent": "prosedur_pinjam", "confidence": 0.92, "reply": "..."}
+
+    Guardrails (per AI-SPEC Section 6):
+    - clf_lsvc is None -> HTTP 503 (model not ready — should not happen dengan module-level init)
+    - message kosong -> pydantic ValidationError -> HTTP 400
+    - confidence < 0.5 -> intent='tidak_dimengerti' (ditangani di predict_intent, D-04)
+    """
+    global clf_lsvc, vectorizer
+
+    if clf_lsvc is None:
+        return jsonify({"error": "model not ready"}), 503
+
+    try:
+        req = ChatRequest.model_validate(request.get_json() or {})
+    except ValidationError:
+        return jsonify({"error": "message cannot be empty"}), 400
+
+    intent, confidence, reply = predict_intent(req.message, vectorizer, clf_lsvc, REPLIES)
+    return jsonify({
+        "intent": intent,
+        "confidence": confidence,
+        "reply": reply
+    })
+
+
+@app.route('/train', methods=['POST'])
+def train():
+    """
+    Retrain kedua classifier dari dataset.py dan simpan joblib.
+    Response: {"trained": true, "lsvc_accuracy": 0.95, "nb_accuracy": 0.87, "samples": 84}
+
+    Auth: X-Train-Key header harus match env var CHATBOT_TRAIN_KEY.
+          Kalau TRAIN_KEY tidak di-set di env, semua request ditolak (fail-secure).
+    Akurasi: train_test_split 80/20 (bukan cross_val_score — nested CV bug, Pitfall 1)
+    """
+    if not TRAIN_KEY:
+        return jsonify({"error": "training disabled — CHATBOT_TRAIN_KEY env var not set"}), 503
+
+    provided = request.headers.get('X-Train-Key', '')
+    # constant-time compare untuk hindari timing attack
+    import hmac
+    if not hmac.compare_digest(provided, TRAIN_KEY):
+        return jsonify({"error": "unauthorized"}), 401
+
+    global vectorizer, clf_lsvc, clf_nb
+
+    dataset = get_training_data()
+    vectorizer, clf_lsvc, clf_nb, lsvc_acc, nb_acc, n_samples = train_and_save(dataset)
+
+    return jsonify({
+        "trained": True,
+        "lsvc_accuracy": lsvc_acc,
+        "nb_accuracy": nb_acc,
+        "samples": n_samples
+    })
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001, debug=False)
