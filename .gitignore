@@ -7,8 +7,17 @@ CLAUDE.md
 *.docx
 ~$*
 
-# ── Folder sisa scaffolding (kosong, tidak direferensikan kode) ──
+# ── Aset unggahan (bukan kode) ──
+# 33 MB sampul buku hasil pindaian terbitan + cadangan lama + logo sekolah.
+# Dapat dibangkitkan ulang lewat skrip di python/scripts/.
 uploads/
+
+# ── Backend PHP ──
+# Memuat JWT_SECRET, CHATBOT_TRAIN_KEY, TINYPNG_API_KEY, dan kredensial basis
+# data. Salin config.example.php menjadi config.local.php lalu isi sendiri.
+api/config.local.php
+# Dependensi Composer — pulihkan dengan `composer install`.
+vendor/
 
 # ── Tooling agen ──
 .claude/

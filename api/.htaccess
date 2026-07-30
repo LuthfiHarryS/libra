@@ -1,0 +1,4 @@
+# Deny direct access ke config files lewat web — extra layer di atas .gitignore
+<FilesMatch "^config\.(local|example)\.php$">
+    Require all denied
+</FilesMatch>
