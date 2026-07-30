@@ -21,14 +21,19 @@ from flask_cors import CORS
 from pydantic import BaseModel, field_validator, ValidationError
 
 from classifier import load_or_train, predict_intent, train_and_save
+import katalog
 from dataset import get_training_data, REPLIES
 
 app = Flask(__name__)
+# Di produksi Nginx mem-proxy /chat pada origin yang sama, jadi request browser
+# tidak lintas-origin dan CORS tidak terpakai. Daftar ini hanya untuk dev; origin
+# produksi bisa ditambahkan lewat env var kalau suatu saat dipanggil lintas domain.
+_extra_origins = [o for o in os.environ.get('CHATBOT_CORS_ORIGINS', '').split(',') if o.strip()]
 CORS(app, origins=[
     'http://localhost:5173',
     'http://localhost:4173',
     'http://127.0.0.1:5173',
-])
+] + _extra_origins)
 
 # Shared secret untuk endpoint /train. Set via env var sebelum start Flask.
 # Kalau env var tidak di-set, /train auto-block (return 503) — fail-secure.
@@ -80,10 +85,30 @@ def chat():
         return jsonify({"error": "message cannot be empty"}), 400
 
     intent, confidence, reply = predict_intent(req.message, vectorizer, clf_lsvc, REPLIES)
+
+    # Jawaban dinamis dari katalog. Classifier tetap yang menentukan intent;
+    # tahap ini hanya mengganti template statis dengan kalimat yang menyebut
+    # judul, jumlah, dan ketersediaan sebenarnya.
+    #
+    # Semua fungsi katalog mengembalikan None kalau database tidak terjangkau
+    # atau entitasnya tidak dikenali — dalam kedua kasus itu template lama
+    # tetap dipakai, sehingga chatbot tidak pernah gagal total.
+    dinamis = None
+    try:
+        if intent == 'cari_buku':
+            dinamis = katalog.jawab_cari_buku(req.message)
+        elif intent == 'rekomendasi_buku':
+            dinamis = katalog.jawab_rekomendasi(req.message)
+        elif intent == 'info_umum':
+            dinamis = katalog.jawab_info_umum(req.message)
+    except Exception:
+        dinamis = None
+
     return jsonify({
         "intent": intent,
         "confidence": confidence,
-        "reply": reply
+        "reply": dinamis or reply,
+        "sumber": "katalog" if dinamis else "template",
     })
 
 

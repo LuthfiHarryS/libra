@@ -21,6 +21,7 @@ function BookFormModal({ book, categories, onClose, onSuccess }: BookFormModalPr
   const [stokTotal, setStokTotal]   = useState(book?.stok_total ?? 1)
   const [kategoriId, setKategoriId] = useState(book?.kategori_id ?? (categories[0]?.id ?? 0))
   const [isLoading, setIsLoading]   = useState(false)
+  const [isLoadingSinopsis, setIsLoadingSinopsis] = useState(false)
 
   // Cover: file baru dipilih admin, atau URL existing dari DB
   const [coverFile, setCoverFile]       = useState<File | null>(null)
@@ -37,6 +38,20 @@ function BookFormModal({ book, categories, onClose, onSuccess }: BookFormModalPr
     setCoverFile(null)
     setCoverPreview(book?.cover_url ?? null)
   }, [book, categories])
+
+  // Sinopsis tidak ikut dikirim oleh GET /books (daftar), hanya oleh GET /books/:id.
+  // Tanpa pengambilan ini, kolom sinopsis selalu tampil kosong dan penyimpanan
+  // akan MENGHAPUS sinopsis yang sudah ada di basis data.
+  useEffect(() => {
+    if (!book) return
+    let dibatalkan = false
+    setIsLoadingSinopsis(true)
+    api.get<ApiResponse<{ sinopsis: string | null }>>(`/books/${book.id}`)
+      .then(res => { if (!dibatalkan) setSinopsis(res.data.data.sinopsis ?? '') })
+      .catch(() => { if (!dibatalkan) toast.error('Gagal memuat sinopsis buku.') })
+      .finally(() => { if (!dibatalkan) setIsLoadingSinopsis(false) })
+    return () => { dibatalkan = true }
+  }, [book])
 
   // Cleanup object URL saat komponen unmount atau file berubah
   useEffect(() => {
@@ -78,6 +93,10 @@ function BookFormModal({ book, categories, onClose, onSuccess }: BookFormModalPr
     e.preventDefault()
     if (!judul.trim() || !penulis.trim()) {
       toast.error('Judul dan penulis wajib diisi.')
+      return
+    }
+    if (isLoadingSinopsis) {
+      toast('Menunggu data buku selesai dimuat...')
       return
     }
     setIsLoading(true)

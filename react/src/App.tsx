@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminBooksPage from './pages/admin/AdminBooksPage'
 import AdminBorrowsPage from './pages/admin/AdminBorrowsPage'
+import AdminStudentsPage from './pages/admin/AdminStudentsPage'
 import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
 import CatalogPage from './pages/CatalogPage'
@@ -67,6 +68,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminPrivateRoute><AdminDashboardPage /></AdminPrivateRoute>} />
         <Route path="/admin/buku"      element={<AdminPrivateRoute><AdminBooksPage /></AdminPrivateRoute>} />
         <Route path="/admin/pinjaman"  element={<AdminPrivateRoute><AdminBorrowsPage /></AdminPrivateRoute>} />
+        <Route path="/admin/siswa"     element={<AdminPrivateRoute><AdminStudentsPage /></AdminPrivateRoute>} />
 
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />

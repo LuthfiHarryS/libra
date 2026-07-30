@@ -5,6 +5,7 @@ import { Search, X } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import BookCard from '../components/BookCard'
 import SkeletonCard from '../components/SkeletonCard'
+import CarouselRow from '../components/CarouselRow'
 import Pagination from '../components/Pagination'
 import EmptyState from '../components/EmptyState'
 import useDebounce from '../hooks/useDebounce'
@@ -14,6 +15,18 @@ import type { Book, Category, ApiResponse, PaginatedResponse } from '../types'
 
 const LIMIT = 12
 
+// Dipakai bersama oleh dropdown kategori dan dropdown urutan agar keduanya
+// tidak pernah berbeda gaya saat salah satunya disunting.
+const GAYA_SELECT: React.CSSProperties = {
+  background: 'var(--bg-input)',
+  border: '1.5px solid var(--border)',
+  borderRadius: '999px',
+  color: 'var(--text)',
+  fontFamily: 'var(--font-ui)',
+  outline: 'none',
+  cursor: 'pointer',
+}
+
 function CatalogPage() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const searchBarRef = useRef<HTMLDivElement>(null)
@@ -21,6 +34,9 @@ function CatalogPage() {
 
   const page = Number(searchParams.get('page') ?? '1')
   const kategoriId = searchParams.get('kategori') ?? ''
+  // 'terbaru' adalah default backend, jadi tidak pernah ditulis ke URL agar
+  // tautan katalog polos tetap bersih.
+  const urutan = searchParams.get('sort') ?? 'terbaru'
   const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '')
   const debouncedSearch = useDebounce(searchInput, 400)
 
@@ -78,12 +94,14 @@ function CatalogPage() {
     setIsLoading(true)
     const q = searchParams.get('q') ?? ''
     const kategori = searchParams.get('kategori') ?? ''
+    const sort = searchParams.get('sort') ?? ''
     const currentPage = Number(searchParams.get('page') ?? '1')
 
     const params: Record<string, string | number> = { page: currentPage, limit: LIMIT }
     // CRITICAL: param must be 'q' — BookController.php reads $_GET['q']
     if (q) params.q = q
     if (kategori) params.kategori_id = kategori
+    if (sort) params.sort = sort
 
     api.get<ApiResponse<PaginatedResponse<Book>>>('/books', { params })
       .then(res => {
@@ -109,6 +127,19 @@ function CatalogPage() {
         updated.delete('kategori')
       }
       updated.delete('page')
+      return updated
+    })
+  }
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSearchParams((prev) => {
+      const updated = new URLSearchParams(prev)
+      if (e.target.value === 'terbaru') {
+        updated.delete('sort')
+      } else {
+        updated.set('sort', e.target.value)
+      }
+      updated.delete('page')   // urutan berubah, nomor halaman lama tidak lagi bermakna
       return updated
     })
   }
@@ -141,7 +172,7 @@ function CatalogPage() {
           {badge}
         </span>
       </div>
-      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 pr-4" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+      <CarouselRow className="gap-3 sm:gap-4 pb-3 pr-4">
         {isLoadingRec
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex-shrink-0 w-[140px] sm:w-[180px] lg:w-[210px]" style={{ scrollSnapAlign: 'start' }}>
@@ -154,7 +185,7 @@ function CatalogPage() {
               </div>
             ))
         }
-      </div>
+      </CarouselRow>
     </div>
   )
 
@@ -197,8 +228,9 @@ function CatalogPage() {
             <RecSection title="Populer" badge="Trending" books={popularRecs} isLoadingRec={isLoadingPopular} />
           )}
 
-          {/* Search + filter row */}
-          <div ref={searchBarRef} className="flex gap-2.5 items-center mt-6">
+          {/* Search + filter row — pada layar sempit kedua dropdown turun ke
+              baris sendiri agar kolom pencarian tidak terjepit */}
+          <div ref={searchBarRef} className="flex flex-col sm:flex-row gap-2.5 sm:items-center mt-6">
             <div className="relative flex-1">
               <Search
                 size={18}
@@ -234,25 +266,31 @@ function CatalogPage() {
               )}
             </div>
 
-            <select
-              value={kategoriId}
-              onChange={handleCategoryChange}
-              className="py-3 px-4 text-sm font-bold flex-shrink-0 transition-all duration-200"
-              style={{
-                background: 'var(--bg-input)',
-                border: '1.5px solid var(--border)',
-                borderRadius: '999px',
-                color: 'var(--text)',
-                fontFamily: 'var(--font-ui)',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="">Semua Kategori</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={String(cat.id)}>{cat.nama}</option>
-              ))}
-            </select>
+            <div className="flex gap-2.5">
+              <select
+                value={kategoriId}
+                onChange={handleCategoryChange}
+                aria-label="Saring menurut kategori"
+                className="py-3 px-4 text-sm font-bold flex-1 sm:flex-initial sm:flex-shrink-0 transition-all duration-200"
+                style={GAYA_SELECT}
+              >
+                <option value="">Semua Kategori</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={String(cat.id)}>{cat.nama}</option>
+                ))}
+              </select>
+
+              <select
+                value={urutan}
+                onChange={handleSortChange}
+                aria-label="Urutkan hasil"
+                className="py-3 px-4 text-sm font-bold flex-1 sm:flex-initial sm:flex-shrink-0 transition-all duration-200"
+                style={GAYA_SELECT}
+              >
+                <option value="terbaru">Terbaru</option>
+                <option value="az">Judul A–Z</option>
+              </select>
+            </div>
           </div>
 
           {!isLoading && (

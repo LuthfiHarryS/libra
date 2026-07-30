@@ -7,8 +7,11 @@ import { MessageCircle, X, Send } from 'lucide-react'
 import axios from 'axios'
 import type { ChatMessage } from '../types'
 
+// Default relatif: di produksi Nginx mem-proxy /chat ke Flask:5001 pada origin yang
+// sama, sehingga tidak ada mixed-content (halaman HTTPS memanggil HTTP) dan tidak
+// perlu CORS. Untuk dev, override lewat VITE_CHATBOT_URL di .env.local.
 const CHATBOT_URL = (import.meta.env.VITE_CHATBOT_URL as string | undefined)
-  ?? 'http://localhost:5001/chat'
+  ?? '/chat'
 
 interface ChatResponse {
   intent: string
@@ -30,6 +33,21 @@ function TypingDots() {
   )
 }
 
+// Contoh pertanyaan yang ditampilkan sebagai tombol saat chat pertama dibuka.
+//
+// Dipilih bentuk tombol, bukan paragraf panduan: siswa SMP cenderung mengetuk
+// daripada membaca instruksi. Tiap tombol juga mencontohkan SATU kemampuan bot,
+// sehingga siswa belajar apa yang bisa ditanyakan hanya dengan melihatnya.
+//
+// Kalimatnya sengaja memakai bahasa sehari-hari ("ada ... nggak") — persis
+// bentuk yang dilatih di dataset, jadi peluang dikenali paling tinggi.
+const SARAN_PERTANYAAN = [
+  'Ada buku komik nggak?',
+  'Gimana cara pinjam buku?',
+  'Buku apa yang bagus?',
+  'Perpus buka jam berapa?',
+]
+
 function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -37,9 +55,16 @@ function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Saran hanya muncul sebelum siswa mengirim pesan pertama, supaya tidak
+  // memenuhi layar saat percakapan sudah berjalan.
+  const tampilkanSaran = messages.length <= 1 && !isLoading
+
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      setMessages([{ role: 'bot', text: 'Halo! Saya asisten LIBRA 📚 Ada yang bisa saya bantu?' }])
+      setMessages([{
+        role: 'bot',
+        text: 'Hai! Aku asisten LIBRA 📚\n\nAku bisa bantu kamu cari buku, kasih rekomendasi, atau jelaskan cara pinjam. Coba ketuk salah satu pertanyaan di bawah, atau tulis sendiri pakai bahasamu.',
+      }])
     }
   }, [isOpen, messages.length])
 
@@ -47,10 +72,10 @@ function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isLoading])
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return
+  const handleSend = async (pesanLangsung?: string) => {
+    const userMsg = (pesanLangsung ?? input).trim()
+    if (!userMsg || isLoading) return
 
-    const userMsg = input.trim()
     setInput('')
     setMessages(prev => [...prev, { role: 'user', text: userMsg }])
     setIsLoading(true)
@@ -88,7 +113,7 @@ function ChatWidget() {
             className="w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0"
             style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--brand) 100%)' }}
           >
-            📚
+            
           </div>
           <div>
             <p className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>Asisten LIBRA</p>
@@ -109,7 +134,7 @@ function ChatWidget() {
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div
-                className="max-w-[78%] text-[13px] font-medium leading-relaxed px-3.5 py-2.5"
+                className="max-w-[78%] text-[13px] font-medium leading-relaxed px-3.5 py-2.5 whitespace-pre-line"
                 style={msg.role === 'user'
                   ? { background: 'var(--accent)', color: '#fff', borderRadius: '18px', borderBottomRightRadius: '4px' }
                   : { background: 'var(--bg-subtle)', color: 'var(--text)', borderRadius: '18px', borderBottomLeftRadius: '4px' }
@@ -124,6 +149,36 @@ function ChatWidget() {
               <TypingDots />
             </div>
           )}
+
+          {/* Tombol saran — mengajarkan kemampuan bot tanpa perlu dibaca */}
+          {tampilkanSaran && (
+            <div className="flex flex-col gap-1.5 mt-1">
+              {SARAN_PERTANYAAN.map(saran => (
+                <button
+                  key={saran}
+                  onClick={() => handleSend(saran)}
+                  className="text-left text-[12.5px] font-semibold px-3 py-2 transition-all duration-150 w-fit max-w-[85%]"
+                  style={{
+                    background: 'transparent',
+                    color: 'var(--accent)',
+                    border: '1.5px solid var(--accent)',
+                    borderRadius: '14px',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--accent)'
+                    e.currentTarget.style.color = '#fff'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = 'var(--accent)'
+                  }}
+                >
+                  {saran}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -135,7 +190,7 @@ function ChatWidget() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
-            placeholder="Ketik pesan..."
+            placeholder="Tanya apa aja soal buku..."
             className="flex-1 px-3.5 py-2 text-[13px] font-medium transition-all duration-200"
             style={{
               background: 'var(--bg-input)',
@@ -149,7 +204,7 @@ function ChatWidget() {
             onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={isLoading || !input.trim()}
             className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-all duration-200 disabled:opacity-40"
             style={{ background: 'var(--accent)' }}

@@ -9,6 +9,7 @@ import { BookOpen, Loader2, ArrowLeft, Heart } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import BookCard from '../components/BookCard'
 import SkeletonCard from '../components/SkeletonCard'
+import CarouselRow from '../components/CarouselRow'
 import useAuthStore from '../store/authStore'
 import api from '../services/api'
 import type { BookDetail, BorrowItem, ApiResponse, Book } from '../types'
@@ -36,6 +37,12 @@ function BookDetailPage() {
     if (!id) return
     setIsLoadingBook(true)
     setCoverError(false)
+    // Berpindah ke buku lain lewat panel rekomendasi hanya mengganti :id —
+    // komponen ini tidak dilepas, sehingga state per-buku harus dibersihkan
+    // sendiri. Tanpa ini, hasBorrowed dari buku sebelumnya ikut terbawa dan
+    // tombol pinjam pada buku baru salah menampilkan "Menunggu persetujuan".
+    setHasBorrowed(false)
+    setNotFound(false)
     api.get<ApiResponse<BookDetail>>(`/books/${id}`)
       .then(res => {
         setBook(res.data.data)
@@ -122,7 +129,7 @@ function BookDetailPage() {
       <>
         <Navbar />
         <div className="pt-[60px]">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 text-center">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-center">
             <p style={{ color: 'var(--text-3)' }}>Buku tidak ditemukan.</p>
             <Link to="/katalog" className="text-sm mt-4 block hover:underline" style={{ color: 'var(--accent)' }}>
               ← Kembali ke Katalog
@@ -138,7 +145,7 @@ function BookDetailPage() {
       <>
         <Navbar />
         <div className="pt-[60px]">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
             <div className="h-4 rounded-full animate-pulse w-32 mb-6" style={{ background: 'var(--bg-subtle)' }} />
             <div className="flex gap-8 flex-col md:flex-row">
               <div className="w-full md:w-56 flex-shrink-0">
@@ -164,7 +171,7 @@ function BookDetailPage() {
     <>
       <Navbar />
       <div className="pt-[60px]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <Link
             to="/katalog"
             className="inline-flex items-center gap-1.5 text-sm font-bold mb-6 transition-colors"
@@ -196,7 +203,11 @@ function BookDetailPage() {
             </div>
 
             {/* Info */}
-            <div className="flex-1">
+            {/* min-w-0 wajib: kolom ini memuat korsel Buku Serupa yang lebarnya
+                melebihi layar. Tanpa min-w-0, flex item memakai min-width:auto
+                sehingga ikut melar dan membuat seluruh halaman meluber ke kanan
+                — sinopsis terpotong dan kartu keluar dari viewport. */}
+            <div className="flex-1 min-w-0">
               <div className="flex items-start gap-3">
                 <h1 className="flex-1 text-2xl font-extrabold leading-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}>
                   {book.judul}
@@ -270,7 +281,7 @@ function BookDetailPage() {
                       CBF
                     </span>
                   </div>
-                  <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4" style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
+                  <CarouselRow className="gap-4 pb-3 -mx-4 px-4">
                     {isLoadingRecs
                       ? Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className="flex-shrink-0" style={{ width: 210, scrollSnapAlign: 'start' }}>
@@ -283,7 +294,7 @@ function BookDetailPage() {
                           </div>
                         ))
                     }
-                  </div>
+                  </CarouselRow>
                 </div>
               )}
 

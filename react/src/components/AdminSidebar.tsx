@@ -3,13 +3,14 @@
 // Active link detection: useLocation().pathname.startsWith(path)
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
-import { LayoutDashboard, BookOpen, BookMarked, LibraryBig, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, BookOpen, BookMarked, LibraryBig, LogOut, Menu, X, Users } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 
 const NAV_LINKS = [
   { to: '/admin/dashboard', label: 'Dashboard',       icon: LayoutDashboard },
   { to: '/admin/buku',      label: 'Kelola Buku',     icon: BookOpen        },
   { to: '/admin/pinjaman',  label: 'Kelola Pinjaman', icon: BookMarked      },
+  { to: '/admin/siswa',     label: 'Kelola Siswa',    icon: Users           },
 ]
 
 function AdminSidebar() {

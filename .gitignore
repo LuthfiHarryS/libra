@@ -33,6 +33,30 @@ python/**/models/
 .env.*
 !.env.example
 
+# Dump basis data — memuat hash kata sandi akun nyata. Repo ini publik, dan hash
+# bcrypt dapat dipecah offline tanpa batas percobaan.
+libra_dump.sql
+*.sql.gz
+
+# Skrip demo memuat kata sandi plaintext akun siswa dan admin.
+start-demo.bat
+
+# ── Berkas operasional server ──
+# Memuat IP dan nama akun SSH mesin produksi.
+deploy/
+
+# ── Materi sumber & keluaran sementara (besar / berhak cipta) ──
+# Catatan: '#' hanya menjadi komentar bila berada di AWAL baris. Komentar yang
+# ditulis di belakang pola akan ikut terbaca sebagai bagian dari pola itu.
+# 115 MB pindaian sampul terbitan
+asli/
+foto cover/
+# Keluaran sementara pemotongan OpenCV
+python/scripts/crops/
+python/scripts/crops2/
+# Termasuk Buku Pedoman Penulisan Ilmiah
+*.pdf
+
 # ── Editor & OS ──
 .vscode/
 .idea/

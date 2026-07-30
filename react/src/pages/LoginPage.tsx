@@ -131,7 +131,7 @@ function LoginPage() {
             className="hidden md:block text-center mt-8 text-[15px] font-semibold leading-relaxed"
             style={{ color: 'var(--text-2)', maxWidth: 420 }}
           >
-            Jelajahi ribuan buku &amp; referensi akademik SMPN 1 Kemang — kapan saja, di mana saja. 📚
+            Jelajahi ribuan buku &amp; referensi akademik SMPN 1 Kemang — kapan saja, di mana saja.
           </p>
         </div>
       </div>
@@ -152,7 +152,7 @@ function LoginPage() {
             </span>
           </div>
 
-          <p className="text-center text-[15px] font-bold mb-6" style={{ color: 'var(--text)' }}>Selamat datang kembali! 👋</p>
+          <p className="text-center text-[15px] font-bold mb-6" style={{ color: 'var(--text)' }}>Selamat datang kembali!</p>
 
           {formError && (
             <div

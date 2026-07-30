@@ -244,6 +244,178 @@ TRAINING_DATA = [
     {"text": "apa itu libra", "intent": "bantuan_sistem"},
     {"text": "cara pakai aplikasi perpustakaan digital ini", "intent": "bantuan_sistem"},
     {"text": "gimana cara operasiin libra", "intent": "bantuan_sistem"},
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # v3 — 140 sampel tambahan (20 per intent), 210 -> 350.
+    #
+    # Ditambahkan setelah pengujian pada sistem produksi menemukan dua celah:
+    #
+    # 1. Nama kategori koleksi tidak pernah muncul di data latih. "ada komik gk
+    #    di perpus ini" hanya mencapai confidence 0.455 karena "komik" di luar
+    #    kosakata. Kategori nyata di katalog — komik, olahraga, agama, fiksi,
+    #    sejarah, teknologi — kini diwakili di cari_buku.
+    #
+    # 2. Bentuk pertanyaan ketersediaan ("ada buku X tidak") tertarik ke
+    #    rekomendasi_buku. Pembeda yang dipakai tetap sama seperti v2: menyebut
+    #    topik spesifik = cari_buku, minta saran tanpa topik = rekomendasi_buku.
+    #    Bentuk tanya itu kini diwakili eksplisit di cari_buku.
+    #
+    # Ragam bahasa siswa diperbanyak: gk, gak, engga, gada, kagak, ky, blm.
+    # ══════════════════════════════════════════════════════════════════════════
+
+    # ── cari_buku +20 — kategori nyata katalog + bentuk tanya ketersediaan ──
+    {"text": "ada komik gk di perpus ini", "intent": "cari_buku"},
+    {"text": "ada buku komik tidak", "intent": "cari_buku"},
+    {"text": "punya komik gak", "intent": "cari_buku"},
+    {"text": "ada buku senam ga", "intent": "cari_buku"},
+    {"text": "buku tentang catur ada tidak", "intent": "cari_buku"},
+    {"text": "ada buku sepak bola nggak di sini", "intent": "cari_buku"},
+    {"text": "punya buku peradaban jepang gak", "intent": "cari_buku"},
+    {"text": "ada buku tentang narkoba tidak", "intent": "cari_buku"},
+    {"text": "buku pramuka ada gak kak", "intent": "cari_buku"},
+    {"text": "ada buku aljabar engga", "intent": "cari_buku"},
+    {"text": "nyari buku tentang bangun ruang", "intent": "cari_buku"},
+    {"text": "ada buku sinopsis lumut ga", "intent": "cari_buku"},
+    {"text": "buku bahasa arab ada tidak", "intent": "cari_buku"},
+    {"text": "ada buku cerita bahasa inggris gk", "intent": "cari_buku"},
+    {"text": "punya buku tentang kewirausahaan nggak", "intent": "cari_buku"},
+    {"text": "ada buku fisika tentang energi tidak", "intent": "cari_buku"},
+    {"text": "mau nyari buku bulu tangkis", "intent": "cari_buku"},
+    {"text": "di perpus ada buku tentang gunung berapi ga", "intent": "cari_buku"},
+    {"text": "buku statistika ada gak ya", "intent": "cari_buku"},
+    {"text": "ada buku tentang pemanasan global tidak", "intent": "cari_buku"},
+
+    # ── rekomendasi_buku +20 — tetap TANPA topik spesifik ──
+    {"text": "enaknya baca apa ya", "intent": "rekomendasi_buku"},
+    {"text": "kasih tau buku bagus dong", "intent": "rekomendasi_buku"},
+    {"text": "ada usulan bacaan gak", "intent": "rekomendasi_buku"},
+    {"text": "bingung mau pinjam apa", "intent": "rekomendasi_buku"},
+    {"text": "buku apa sih yang seru", "intent": "rekomendasi_buku"},
+    {"text": "saranin dong bacaan buat aku", "intent": "rekomendasi_buku"},
+    {"text": "buku apa yang banyak dipinjam", "intent": "rekomendasi_buku"},
+    {"text": "rekomendasi buku buat anak smp dong", "intent": "rekomendasi_buku"},
+    {"text": "mana buku yang paling bagus di sini", "intent": "rekomendasi_buku"},
+    {"text": "aku harus baca buku apa", "intent": "rekomendasi_buku"},
+    {"text": "kasih pilihan buku dong kak", "intent": "rekomendasi_buku"},
+    {"text": "buku yang gampang dibaca apa ya", "intent": "rekomendasi_buku"},
+    {"text": "ada bacaan ringan gak", "intent": "rekomendasi_buku"},
+    {"text": "rekomendasiin bacaan buat pemula", "intent": "rekomendasi_buku"},
+    {"text": "buku apa yang kamu suka", "intent": "rekomendasi_buku"},
+    {"text": "usul buku dong yang menarik", "intent": "rekomendasi_buku"},
+    {"text": "mau baca yang seru apa ya", "intent": "rekomendasi_buku"},
+    {"text": "buku andalan di perpus apa", "intent": "rekomendasi_buku"},
+    {"text": "kasih ide bacaan dong", "intent": "rekomendasi_buku"},
+    {"text": "yang bagus dibaca apa nih", "intent": "rekomendasi_buku"},
+
+    # ── prosedur_pinjam +20 ──
+    {"text": "cara minjam gimana", "intent": "prosedur_pinjam"},
+    {"text": "gimana sih pinjam bukunya", "intent": "prosedur_pinjam"},
+    {"text": "boleh pinjam berapa buku", "intent": "prosedur_pinjam"},
+    {"text": "berapa lama boleh dipinjam", "intent": "prosedur_pinjam"},
+    {"text": "syaratnya apa buat minjam", "intent": "prosedur_pinjam"},
+    {"text": "cara balikin buku gimana", "intent": "prosedur_pinjam"},
+    {"text": "kalau telat balikin kena apa", "intent": "prosedur_pinjam"},
+    {"text": "bisa perpanjang pinjaman gak", "intent": "prosedur_pinjam"},
+    {"text": "pinjam buku harus izin siapa", "intent": "prosedur_pinjam"},
+    {"text": "prosedur peminjaman dong", "intent": "prosedur_pinjam"},
+    {"text": "maksimal pinjam berapa hari", "intent": "prosedur_pinjam"},
+    {"text": "cara ajukan pinjam buku", "intent": "prosedur_pinjam"},
+    {"text": "kalau bukunya hilang gimana", "intent": "prosedur_pinjam"},
+    {"text": "pengembalian buku caranya", "intent": "prosedur_pinjam"},
+    {"text": "aturan meminjam di perpus apa", "intent": "prosedur_pinjam"},
+    {"text": "apa boleh pinjam lebih dari 3", "intent": "prosedur_pinjam"},
+    {"text": "gimana kalau mau pinjam lagi", "intent": "prosedur_pinjam"},
+    {"text": "tata cara pinjam buku dong", "intent": "prosedur_pinjam"},
+    {"text": "denda telat berapa", "intent": "prosedur_pinjam"},
+    {"text": "harus nunggu disetujui ya kalau pinjam", "intent": "prosedur_pinjam"},
+
+    # ── cek_status_pinjam +20 ──
+    {"text": "pinjamanku udah di-approve belum", "intent": "cek_status_pinjam"},
+    {"text": "cek status pinjaman dong", "intent": "cek_status_pinjam"},
+    {"text": "buku yang aku pinjam apa aja", "intent": "cek_status_pinjam"},
+    {"text": "pengajuanku diterima gak", "intent": "cek_status_pinjam"},
+    {"text": "kapan buku aku harus dibalikin", "intent": "cek_status_pinjam"},
+    {"text": "aku lagi pinjam berapa buku", "intent": "cek_status_pinjam"},
+    {"text": "status peminjaman saya apa", "intent": "cek_status_pinjam"},
+    {"text": "pinjamanku ditolak ya", "intent": "cek_status_pinjam"},
+    {"text": "lihat riwayat pinjam dong", "intent": "cek_status_pinjam"},
+    {"text": "udah jatuh tempo belum pinjamanku", "intent": "cek_status_pinjam"},
+    {"text": "cek pinjaman aku dong kak", "intent": "cek_status_pinjam"},
+    {"text": "buku yang belum aku kembalikan apa", "intent": "cek_status_pinjam"},
+    {"text": "pengajuan pinjam saya gimana", "intent": "cek_status_pinjam"},
+    {"text": "masih ada pinjaman aktif gak", "intent": "cek_status_pinjam"},
+    {"text": "kapan batas pengembalian aku", "intent": "cek_status_pinjam"},
+    {"text": "daftar pinjaman saya mana", "intent": "cek_status_pinjam"},
+    {"text": "aku telat balikin gak ya", "intent": "cek_status_pinjam"},
+    {"text": "pinjaman kemarin gimana statusnya", "intent": "cek_status_pinjam"},
+    {"text": "sudah di acc belum pinjamanku", "intent": "cek_status_pinjam"},
+    {"text": "berapa buku yang masih aku pegang", "intent": "cek_status_pinjam"},
+
+    # ── info_umum +20 ──
+    {"text": "perpus buka jam berapa", "intent": "info_umum"},
+    {"text": "hari sabtu buka gak", "intent": "info_umum"},
+    {"text": "perpus tutup jam berapa", "intent": "info_umum"},
+    {"text": "lokasi perpustakaan di mana", "intent": "info_umum"},
+    {"text": "libra itu apa sih", "intent": "info_umum"},
+    {"text": "perpus ada di gedung mana", "intent": "info_umum"},
+    {"text": "berapa jumlah buku di perpus", "intent": "info_umum"},
+    {"text": "hari minggu buka tidak", "intent": "info_umum"},
+    {"text": "jadwal perpustakaan gimana", "intent": "info_umum"},
+    {"text": "siapa petugas perpusnya", "intent": "info_umum"},
+    {"text": "boleh makan di perpus gak", "intent": "info_umum"},
+    {"text": "aturan di perpustakaan apa aja", "intent": "info_umum"},
+    {"text": "perpus sekolah ini namanya apa", "intent": "info_umum"},
+    {"text": "koleksi bukunya ada berapa", "intent": "info_umum"},
+    {"text": "kategori buku apa aja yang ada", "intent": "info_umum"},
+    {"text": "boleh bawa tas masuk gak", "intent": "info_umum"},
+    {"text": "jam istirahat perpus buka gak", "intent": "info_umum"},
+    {"text": "perpustakaan libra punya siapa", "intent": "info_umum"},
+    {"text": "ada ruang baca gak di perpus", "intent": "info_umum"},
+    {"text": "info perpustakaan dong", "intent": "info_umum"},
+
+    # ── bantuan_sistem +20 ──
+    {"text": "cara pakai aplikasi ini gimana", "intent": "bantuan_sistem"},
+    {"text": "gimana cara login", "intent": "bantuan_sistem"},
+    {"text": "aku lupa password gimana", "intent": "bantuan_sistem"},
+    {"text": "cara ganti tema gelap gimana", "intent": "bantuan_sistem"},
+    {"text": "gimana cara nyimpan buku favorit", "intent": "bantuan_sistem"},
+    {"text": "notifikasi di mana ya", "intent": "bantuan_sistem"},
+    {"text": "cara pakai fitur pencarian gimana", "intent": "bantuan_sistem"},
+    {"text": "aplikasinya error nih", "intent": "bantuan_sistem"},
+    {"text": "gimana cara logout", "intent": "bantuan_sistem"},
+    {"text": "cara filter buku per kategori gimana", "intent": "bantuan_sistem"},
+    {"text": "tombol pinjam di mana", "intent": "bantuan_sistem"},
+    {"text": "halaman profil di mana ya", "intent": "bantuan_sistem"},
+    {"text": "gak bisa masuk ke akun", "intent": "bantuan_sistem"},
+    {"text": "cara lihat detail buku gimana", "intent": "bantuan_sistem"},
+    {"text": "webnya lemot banget", "intent": "bantuan_sistem"},
+    {"text": "cara pakai libra buat pemula", "intent": "bantuan_sistem"},
+    {"text": "fitur apa aja yang ada di aplikasi", "intent": "bantuan_sistem"},
+    {"text": "cara hapus favorit gimana", "intent": "bantuan_sistem"},
+    {"text": "tampilannya kok kosong", "intent": "bantuan_sistem"},
+    {"text": "bantuin pakai aplikasinya dong", "intent": "bantuan_sistem"},
+
+    # ── salam +20 — ditebalkan untuk input sangat pendek ──
+    {"text": "halo kak", "intent": "salam"},
+    {"text": "hai bot libra", "intent": "salam"},
+    {"text": "hallo kak", "intent": "salam"},
+    {"text": "helo", "intent": "salam"},
+    {"text": "hei", "intent": "salam"},
+    {"text": "woi", "intent": "salam"},
+    {"text": "pagi", "intent": "salam"},
+    {"text": "siang", "intent": "salam"},
+    {"text": "sore", "intent": "salam"},
+    {"text": "malam", "intent": "salam"},
+    {"text": "assalamualaikum kak", "intent": "salam"},
+    {"text": "halo apa kabar", "intent": "salam"},
+    {"text": "hai apa kabar kak", "intent": "salam"},
+    {"text": "permisi mau tanya", "intent": "salam"},
+    {"text": "halo bot", "intent": "salam"},
+    {"text": "hi kak", "intent": "salam"},
+    {"text": "haii", "intent": "salam"},
+    {"text": "selamat datang libra", "intent": "salam"},
+    {"text": "halo perpustakaan", "intent": "salam"},
+    {"text": "hey libra apa kabar", "intent": "salam"},
 ]
 
 REPLIES = {

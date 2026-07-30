@@ -1,0 +1,956 @@
+[
+  {
+    "file": "crop002__r0c0.jpg",
+    "dari_crop": 2,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.00 PM (2).jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop002__r2c0.jpg",
+    "dari_crop": 2,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.00 PM (2).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop004__r1c0.jpg",
+    "dari_crop": 4,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.00 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop004__r2c0.jpg",
+    "dari_crop": 4,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.00 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop007__r0c0.jpg",
+    "dari_crop": 7,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.03 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop007__r0c2.jpg",
+    "dari_crop": 7,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.03 PM.jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop007__r1c0.jpg",
+    "dari_crop": 7,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.03 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop007__r1c2.jpg",
+    "dari_crop": 7,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.03 PM.jpeg",
+    "sel": [
+      1,
+      2
+    ]
+  },
+  {
+    "file": "crop007__r2c1.jpg",
+    "dari_crop": 7,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.03 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop033__r0c0.jpg",
+    "dari_crop": 33,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.18 PM (2).jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop033__r0c1.jpg",
+    "dari_crop": 33,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.18 PM (2).jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop034__r0c0.jpg",
+    "dari_crop": 34,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.18 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop034__r1c1.jpg",
+    "dari_crop": 34,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.18 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop034__r2c1.jpg",
+    "dari_crop": 34,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.18 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop034__r2c2.jpg",
+    "dari_crop": 34,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.18 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop035__r2c0.jpg",
+    "dari_crop": 35,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.19 PM (1).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop035__r2c1.jpg",
+    "dari_crop": 35,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.19 PM (1).jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop038__r0c2.jpg",
+    "dari_crop": 38,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.19 PM.jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop038__r1c0.jpg",
+    "dari_crop": 38,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.19 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop038__r2c0.jpg",
+    "dari_crop": 38,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.19 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop038__r2c1.jpg",
+    "dari_crop": 38,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.19 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop045__r0c2.jpg",
+    "dari_crop": 45,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM (1).jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop045__r1c0.jpg",
+    "dari_crop": 45,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM (1).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop045__r1c1.jpg",
+    "dari_crop": 45,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM (1).jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop045__r2c0.jpg",
+    "dari_crop": 45,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM (1).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop045__r2c1.jpg",
+    "dari_crop": 45,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM (1).jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop049__r0c0.jpg",
+    "dari_crop": 49,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop049__r0c1.jpg",
+    "dari_crop": 49,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM.jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop049__r1c0.jpg",
+    "dari_crop": 49,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop049__r1c1.jpg",
+    "dari_crop": 49,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop049__r2c2.jpg",
+    "dari_crop": 49,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.21 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop053__r0c2.jpg",
+    "dari_crop": 53,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.22 PM.jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop053__r1c0.jpg",
+    "dari_crop": 53,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.22 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop053__r1c1.jpg",
+    "dari_crop": 53,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.22 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop053__r2c0.jpg",
+    "dari_crop": 53,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.22 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop053__r2c1.jpg",
+    "dari_crop": 53,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.22 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop055__r0c0.jpg",
+    "dari_crop": 55,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.23 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop055__r0c1.jpg",
+    "dari_crop": 55,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.23 PM.jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop055__r1c0.jpg",
+    "dari_crop": 55,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.23 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop055__r1c1.jpg",
+    "dari_crop": 55,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.23 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop055__r2c2.jpg",
+    "dari_crop": 55,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.23 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop056__r0c2.jpg",
+    "dari_crop": 56,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM (1).jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop056__r1c0.jpg",
+    "dari_crop": 56,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM (1).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop056__r1c1.jpg",
+    "dari_crop": 56,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM (1).jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop056__r2c0.jpg",
+    "dari_crop": 56,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM (1).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop056__r2c1.jpg",
+    "dari_crop": 56,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM (1).jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop059__r1c1.jpg",
+    "dari_crop": 59,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop059__r1c2.jpg",
+    "dari_crop": 59,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM.jpeg",
+    "sel": [
+      1,
+      2
+    ]
+  },
+  {
+    "file": "crop059__r2c1.jpg",
+    "dari_crop": 59,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop059__r2c2.jpg",
+    "dari_crop": 59,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.24 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop064__r0c0.jpg",
+    "dari_crop": 64,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.26 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop064__r2c0.jpg",
+    "dari_crop": 64,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.26 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop074__r0c0.jpg",
+    "dari_crop": 74,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.32 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop074__r1c0.jpg",
+    "dari_crop": 74,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.32 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop074__r2c2.jpg",
+    "dari_crop": 74,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.32 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop082__r0c2.jpg",
+    "dari_crop": 82,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.36 PM.jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop082__r1c1.jpg",
+    "dari_crop": 82,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.36 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop082__r1c2.jpg",
+    "dari_crop": 82,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.36 PM.jpeg",
+    "sel": [
+      1,
+      2
+    ]
+  },
+  {
+    "file": "crop082__r2c0.jpg",
+    "dari_crop": 82,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.36 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop083__r1c0.jpg",
+    "dari_crop": 83,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.37 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop083__r1c1.jpg",
+    "dari_crop": 83,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.37 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop085__r0c1.jpg",
+    "dari_crop": 85,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.38 PM (1).jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop085__r1c1.jpg",
+    "dari_crop": 85,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.38 PM (1).jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop087__r2c0.jpg",
+    "dari_crop": 87,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.39 PM (1).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop087__r2c1.jpg",
+    "dari_crop": 87,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.39 PM (1).jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop089__r0c0.jpg",
+    "dari_crop": 89,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.39 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop089__r1c0.jpg",
+    "dari_crop": 89,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.39 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop089__r1c1.jpg",
+    "dari_crop": 89,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.39 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop093__r1c0.jpg",
+    "dari_crop": 93,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.41 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop093__r2c0.jpg",
+    "dari_crop": 93,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.41 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop093__r2c1.jpg",
+    "dari_crop": 93,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.41 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop095__r0c0.jpg",
+    "dari_crop": 95,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.45 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop095__r1c1.jpg",
+    "dari_crop": 95,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.45 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop095__r1c2.jpg",
+    "dari_crop": 95,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.45 PM.jpeg",
+    "sel": [
+      1,
+      2
+    ]
+  },
+  {
+    "file": "crop095__r2c1.jpg",
+    "dari_crop": 95,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.45 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop095__r2c2.jpg",
+    "dari_crop": 95,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.45 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop098__r1c0.jpg",
+    "dari_crop": 98,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.46 PM (1).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop098__r1c1.jpg",
+    "dari_crop": 98,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.46 PM (1).jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop099__r0c0.jpg",
+    "dari_crop": 99,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.46 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop099__r0c1.jpg",
+    "dari_crop": 99,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.46 PM.jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop101__r0c0.jpg",
+    "dari_crop": 101,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM (1).jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop101__r0c1.jpg",
+    "dari_crop": 101,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM (1).jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop103__r1c0.jpg",
+    "dari_crop": 103,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM (2).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop103__r2c0.jpg",
+    "dari_crop": 103,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM (2).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop103__r2c1.jpg",
+    "dari_crop": 103,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM (2).jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop105__r0c0.jpg",
+    "dari_crop": 105,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop105__r2c1.jpg",
+    "dari_crop": 105,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.47 PM.jpeg",
+    "sel": [
+      2,
+      1
+    ]
+  },
+  {
+    "file": "crop107__r0c0.jpg",
+    "dari_crop": 107,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.48 PM (2).jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop107__r1c0.jpg",
+    "dari_crop": 107,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.48 PM (2).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop109__r0c1.jpg",
+    "dari_crop": 109,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.48 PM.jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop109__r1c0.jpg",
+    "dari_crop": 109,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.48 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop110__r0c0.jpg",
+    "dari_crop": 110,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.49 PM (1).jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop110__r0c1.jpg",
+    "dari_crop": 110,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.49 PM (1).jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop112__r0c0.jpg",
+    "dari_crop": 112,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.49 PM.jpeg",
+    "sel": [
+      0,
+      0
+    ]
+  },
+  {
+    "file": "crop112__r1c0.jpg",
+    "dari_crop": 112,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.49 PM.jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop112__r2c0.jpg",
+    "dari_crop": 112,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.49 PM.jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop113__r0c1.jpg",
+    "dari_crop": 113,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (1).jpeg",
+    "sel": [
+      0,
+      1
+    ]
+  },
+  {
+    "file": "crop113__r1c0.jpg",
+    "dari_crop": 113,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (1).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop113__r2c0.jpg",
+    "dari_crop": 113,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (1).jpeg",
+    "sel": [
+      2,
+      0
+    ]
+  },
+  {
+    "file": "crop115__r0c2.jpg",
+    "dari_crop": 115,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (2).jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop115__r1c0.jpg",
+    "dari_crop": 115,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (2).jpeg",
+    "sel": [
+      1,
+      0
+    ]
+  },
+  {
+    "file": "crop115__r1c1.jpg",
+    "dari_crop": 115,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (2).jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop115__r2c2.jpg",
+    "dari_crop": 115,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM (2).jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  },
+  {
+    "file": "crop116__r0c2.jpg",
+    "dari_crop": 116,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM.jpeg",
+    "sel": [
+      0,
+      2
+    ]
+  },
+  {
+    "file": "crop116__r1c1.jpg",
+    "dari_crop": 116,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM.jpeg",
+    "sel": [
+      1,
+      1
+    ]
+  },
+  {
+    "file": "crop116__r2c2.jpg",
+    "dari_crop": 116,
+    "sumber": "WhatsApp Image 2026-07-27 at 9.04.50 PM.jpeg",
+    "sel": [
+      2,
+      2
+    ]
+  }
+]
