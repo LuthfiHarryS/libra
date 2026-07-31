@@ -40,6 +40,54 @@ NB_PATH         = os.path.join(MODELS_DIR, 'model_nb.joblib')
 
 THRESHOLD = 0.5
 
+# Kosakata domain perpustakaan, dalam bentuk SUDAH DI-STEM oleh preprocess().
+#
+# Ambang keyakinan saja tidak cukup menolak pertanyaan di luar topik. Classifier
+# ini tertutup pada 7 kelas: apa pun yang masuk dipaksa menjadi salah satunya,
+# dan pertanyaan seperti "bel pulang jam berapa" atau "film bagus apa" tetap
+# memperoleh keyakinan tinggi karena bentuk kalimatnya mirip pertanyaan
+# perpustakaan. Pengukuran menunjukkan hanya 40% pertanyaan di luar topik yang
+# tertolak oleh ambang.
+#
+# Penjaga ini menambahkan syarat kedua: pesan harus menyinggung setidaknya satu
+# kata dari domain perpustakaan. Intent 'salam' dikecualikan karena sapaan
+# memang tidak memuat kata benda domain.
+_KOSAKATA_DOMAIN = {
+    # koleksi dan katalog
+    'buku', 'baca', 'katalog', 'judul', 'tulis', 'kategori', 'koleksi',
+    'novel', 'komik', 'fiksi', 'cerpen', 'kamus', 'ensiklopedia', 'majalah',
+    # perpustakaan
+    'pustaka', 'pus', 'perpus', 'libra', 'rak',
+    # peminjaman
+    'kembali', 'balik', 'balikin', 'masuk',
+    'denda', 'telat', 'tempo', 'anggota', 'kartu', 'stok', 'sedia',
+    'tunggak', 'aju', 'acc',
+    # saran
+    'rekomendasi', 'saran', 'usul',
+    # sistem
+    'aplikasi', 'akun', 'sandi', 'password', 'login', 'logout', 'favorit',
+    'profil', 'halaman', 'menu', 'tombol', 'fitur', 'cari', 'web', 'situs',
+    # nama kategori koleksi
+    'matematika', 'sains', 'biologi', 'fisika', 'kimia', 'ips', 'ipa',
+    'sejarah', 'olahraga', 'agama', 'teknologi', 'inggris', 'pkn',
+}
+
+
+# Ragam bahasa siswa menghasilkan terlalu banyak turunan untuk didaftar satu per
+# satu: pinjeman, pinjemnya, pinjamanku, minjemin, bukunya, bacaannya. Awalan
+# berikut dicocokkan sebagai prefiks sehingga seluruh keluarga kata ikut
+# terjaring tanpa perlu diperbarui setiap kali ada bentuk baru.
+_AWALAN_DOMAIN = ('pinjam', 'pinjem', 'minjam', 'minjem',
+                  'buku', 'baca', 'pustaka', 'perpus', 'katalog')
+
+
+def _menyinggung_domain(preprocessed: str) -> bool:
+    """True kalau pesan memuat minimal satu kata kosakata domain perpustakaan."""
+    token = preprocessed.split()
+    if set(token) & _KOSAKATA_DOMAIN:
+        return True
+    return any(t.startswith(_AWALAN_DOMAIN) for t in token)
+
 
 def train_and_save(dataset):
     """
@@ -99,8 +147,16 @@ def load_or_train(dataset):
 def predict_intent(message, vectorizer, clf_lsvc, REPLIES):
     """
     Klasifikasi intent dari pesan teks.
-    - Jika max(predict_proba) < THRESHOLD (0.5) -> paksa intent='tidak_dimengerti' (per D-04)
-    - 'tidak_dimengerti' BUKAN kelas training — ini adalah threshold fallback
+
+    Dua syarat harus dipenuhi sebelum sebuah intent diterima:
+    1. max(predict_proba) >= THRESHOLD (0.5) — keyakinan cukup (D-04)
+    2. pesan menyinggung kosakata domain perpustakaan — kecuali untuk 'salam',
+       karena sapaan memang tidak memuat kata benda domain
+
+    Keduanya gagal -> intent='tidak_dimengerti'. Kelas ini BUKAN kelas training,
+    melainkan mekanisme cadangan agar chatbot tidak menjawab dengan yakin
+    pertanyaan yang berada di luar cakupannya.
+
     Returns: (intent: str, confidence: float, reply: str)
     """
     preprocessed = preprocess(message)
@@ -110,6 +166,8 @@ def predict_intent(message, vectorizer, clf_lsvc, REPLIES):
     intent       = clf_lsvc.classes_[np.argmax(proba)]
 
     if confidence < THRESHOLD:
+        intent = 'tidak_dimengerti'
+    elif intent != 'salam' and not _menyinggung_domain(preprocessed):
         intent = 'tidak_dimengerti'
 
     reply = REPLIES.get(intent, REPLIES['tidak_dimengerti'])

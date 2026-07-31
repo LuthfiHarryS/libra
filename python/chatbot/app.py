@@ -99,6 +99,8 @@ def chat():
             dinamis = katalog.jawab_cari_buku(req.message)
         elif intent == 'rekomendasi_buku':
             dinamis = katalog.jawab_rekomendasi(req.message)
+        elif intent == 'prosedur_pinjam':
+            dinamis = katalog.jawab_prosedur_pinjam(req.message)
         elif intent == 'info_umum':
             dinamis = katalog.jawab_info_umum(req.message)
     except Exception:

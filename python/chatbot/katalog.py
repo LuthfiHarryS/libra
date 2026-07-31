@@ -61,6 +61,13 @@ SINONIM_KATEGORI = {
     'teknologi': 'Teknologi', 'komputer': 'Teknologi', 'tik': 'Teknologi',
     'inggris': 'Bahasa Inggris', 'english': 'Bahasa Inggris',
     'bahasa inggris': 'Bahasa Inggris',
+    # Kategori berikut ada di tabel kategori tetapi belum berisi buku. Tetap
+    # dipetakan supaya jawabannya "belum ada buku kategori X" yang akurat,
+    # bukan templat umum cara memakai fitur pencarian.
+    'pkn': 'PKN', 'ppkn': 'PKN', 'kewarganegaraan': 'PKN',
+    # HANYA frasa dua kata. Memetakan 'indonesia' sendirian akan membajak
+    # pertanyaan seperti "buku tentang sejarah Indonesia" ke kategori kosong.
+    'bahasa indonesia': 'Bahasa Indonesia',
 }
 
 # Kata yang tidak boleh dianggap topik pencarian meski lolos filter panjang.
@@ -71,6 +78,13 @@ BUKAN_TOPIK = {
     'ini', 'itu', 'kah', 'ya', 'yaa', 'nih', 'sih', 'min', 'bot', 'engga',
     'kagak', 'gada', 'adakah', 'berapa', 'banyak', 'jumlah', 'koleksi',
 }
+
+# Dipakai jawab_info_umum untuk memisahkan pertanyaan jumlah koleksi dari
+# pertanyaan jam operasional, yang sama-sama memuat kata "berapa".
+_KATA_UKURAN  = {'berapa', 'jumlah', 'banyak', 'kategori', 'koleksi', 'total'}
+_KATA_KOLEKSI = {'buku', 'bukunya', 'koleksi', 'judul', 'kategori', 'bacaan'}
+_KATA_WAKTU   = {'jam', 'pukul', 'buka', 'bukanya', 'tutup', 'tutupnya', 'hari',
+                 'jadwal', 'libur', 'sabtu', 'minggu', 'istirahat', 'operasional'}
 
 
 def ekstrak_kategori(pesan: str) -> Optional[str]:
@@ -99,7 +113,16 @@ def ekstrak_topik(pesan: str) -> Optional[str]:
 
 # ── Query ───────────────────────────────────────────────────────────────────
 def cari_per_kategori(kategori: str):
-    """(jumlah, [judul...]) untuk satu kategori. None kalau DB tidak terjangkau."""
+    """
+    (jumlah, tersedia, [judul...]) untuk satu kategori.
+
+    `tersedia` dihitung atas SELURUH kategori, bukan hanya judul contoh.
+    Sebelumnya ketersediaan disimpulkan dari tiga judul contoh saja, sehingga
+    kalimat "semuanya bisa langsung dipinjam" bisa keliru untuk kategori yang
+    sebagian bukunya sedang dipinjam habis.
+
+    None kalau DB tidak terjangkau.
+    """
     try:
         with _conn() as c, c.cursor() as cur:
             cur.execute(
@@ -112,11 +135,14 @@ def cari_per_kategori(kategori: str):
             )
             contoh = cur.fetchall()
             cur.execute(
-                """SELECT COUNT(*) AS n FROM buku b
+                """SELECT COUNT(*) AS n,
+                          COALESCE(SUM(b.stok_tersedia > 0), 0) AS tersedia
+                   FROM buku b
                    JOIN kategori k ON k.id = b.kategori_id WHERE k.nama = %s""",
                 (kategori,),
             )
-            return cur.fetchone()['n'], contoh
+            row = cur.fetchone()
+            return row['n'], int(row['tersedia']), contoh
     except Exception:
         return None
 
@@ -187,6 +213,22 @@ def _daftar_judul(rows) -> str:
     return ', '.join(judul[:-1]) + ' dan ' + judul[-1]
 
 
+def _keterangan_penulis(rows) -> str:
+    """
+    " karya X" hanya kalau X benar-benar menulis SEMUA judul yang disebut.
+
+    Sebelumnya penulis judul pertama ditempelkan ke seluruh daftar, sehingga
+    jawaban menyatakan tiga buku karya satu orang padahal penulisnya berbeda.
+    Untuk daftar dengan penulis campuran, atribusi dihilangkan sepenuhnya.
+    """
+    penulis = {(r.get('penulis') or '').strip() for r in rows}
+    if len(penulis) == 1:
+        satu = penulis.pop()
+        if satu:
+            return f" karya {satu}"
+    return ""
+
+
 def jawab_cari_buku(pesan: str) -> Optional[str]:
     """Jawaban dinamis untuk intent cari_buku. None -> pakai template lama."""
     kategori = ekstrak_kategori(pesan)
@@ -194,18 +236,18 @@ def jawab_cari_buku(pesan: str) -> Optional[str]:
         hasil = cari_per_kategori(kategori)
         if hasil is None:
             return None
-        jumlah, contoh = hasil
+        jumlah, tersedia, contoh = hasil
         if jumlah == 0:
             return (f"Maaf, belum ada buku kategori {kategori} di koleksi LIBRA saat ini. "
                     f"Coba cari kategori lain lewat halaman Katalog ya!")
-        tersedia = sum(1 for r in contoh if r['stok_tersedia'] > 0)
         kalimat = (f"Ada {jumlah} buku kategori {kategori} di LIBRA. "
-                   f"Contohnya {_daftar_judul(contoh)}")
-        if contoh:
-            kalimat += f" karya {contoh[0]['penulis']}"
-        kalimat += ". "
-        kalimat += ("Semuanya bisa langsung dipinjam." if tersedia == len(contoh)
-                    else "Cek halaman Katalog untuk melihat ketersediaannya.")
+                   f"Contohnya {_daftar_judul(contoh)}{_keterangan_penulis(contoh)}. ")
+        if tersedia == jumlah:
+            kalimat += "Semuanya bisa langsung dipinjam."
+        elif tersedia == 0:
+            kalimat += "Sayangnya semua sedang dipinjam. Cek halaman Katalog secara berkala ya!"
+        else:
+            kalimat += f"Saat ini {tersedia} di antaranya bisa langsung dipinjam."
         return kalimat
 
     kandidat = kandidat_topik(pesan)
@@ -240,9 +282,11 @@ def jawab_rekomendasi(pesan: str) -> Optional[str]:
     if kategori:
         hasil = cari_per_kategori(kategori)
         if hasil and hasil[0] > 0:
+            contoh = hasil[2]
             return (f"Untuk kategori {kategori}, kamu bisa mulai dari "
-                    f"{_daftar_judul(hasil[1])}. Rekomendasi yang lebih sesuai "
-                    f"denganmu ada di bagian 'Rekomendasi untuk Kamu' di halaman utama.")
+                    f"{_daftar_judul(contoh)}{_keterangan_penulis(contoh)}. "
+                    f"Rekomendasi yang lebih sesuai denganmu ada di bagian "
+                    f"'Rekomendasi untuk Kamu' di halaman utama.")
 
     rows = buku_terpopuler()
     if not rows:
@@ -253,10 +297,76 @@ def jawab_rekomendasi(pesan: str) -> Optional[str]:
             f"pernah kamu pinjam.")
 
 
+# Aturan peminjaman. Nilai di bawah HARUS sama dengan sumber kebenarannya:
+#   DURASI_PINJAM_HARI -> react/src/components/DueCountdown.tsx BORROW_DURATION_DAYS
+#                         dan INTERVAL 7 DAY di api/controllers/AdminController.php
+#   BATAS_PINJAM_AKTIF -> BATAS_PINJAM di api/config.php
+# Kalau salah satu diubah, ubah juga di sini — chatbot tidak membacanya dari API.
+DURASI_PINJAM_HARI = 7
+BATAS_PINJAM_AKTIF = 3
+
+
+def jawab_prosedur_pinjam(pesan: str) -> Optional[str]:
+    """
+    Jawaban bertopik untuk intent prosedur_pinjam.
+
+    Satu intent ini menampung seluruh daur hidup peminjaman: cara meminjam,
+    durasi, batas jumlah, pengembalian, perpanjangan, denda, serta buku hilang
+    atau rusak. Templat tetapnya hanya menjelaskan cara MEMINJAM, sehingga
+    pertanyaan "cara mengembalikan buku" dijawab langkah peminjaman. Fungsi ini
+    memilih paragraf yang sesuai; None berarti pakai templat lama.
+
+    Denda dan perpanjangan sengaja dijawab apa adanya: kedua fitur itu TIDAK ada
+    di sistem, jadi siswa diarahkan ke petugas alih-alih diberi aturan karangan.
+    """
+    kata = set(re.sub(r'[^\w\s]', ' ', pesan.lower()).split())
+
+    if kata & {'hilang', 'rusak', 'sobek', 'basah', 'ilang'}:
+        return ("Kalau buku yang kamu pinjam hilang atau rusak, segera lapor ke petugas "
+                "perpustakaan ya. Penggantiannya diatur langsung oleh petugas, bukan "
+                "lewat aplikasi LIBRA.")
+
+    if kata & {'denda', 'didenda', 'sanksi', 'telat', 'terlambat'}:
+        return (f"LIBRA mencatat tanggal jatuh tempo dan menandai peminjaman yang lewat "
+                f"{DURASI_PINJAM_HARI} hari sebagai terlambat, tetapi aplikasi ini tidak "
+                f"menghitung denda. Ketentuan denda diatur petugas perpustakaan, jadi "
+                f"tanyakan langsung ke petugas ya.")
+
+    if kata & {'perpanjang', 'diperpanjang', 'perpanjangan', 'tambah', 'ditambah'}:
+        return ("Perpanjangan masa pinjam belum bisa diajukan lewat aplikasi LIBRA. "
+                "Kembalikan dulu bukunya ke petugas, lalu ajukan peminjaman baru dari "
+                "halaman Katalog kalau masih mau membacanya.")
+
+    if kata & {'kembalikan', 'mengembalikan', 'pengembalian', 'balikin', 'balik', 'kembali'}:
+        return (f"Cara mengembalikan buku: bawa bukunya ke petugas perpustakaan sebelum "
+                f"batas {DURASI_PINJAM_HARI} hari. Petugas yang akan menandai peminjamanmu "
+                f"sebagai 'Dikembalikan' di LIBRA, dan stok buku otomatis bertambah lagi. "
+                f"Status terbarunya bisa kamu lihat di halaman 'Status Peminjaman'.")
+
+    if kata & {'lama', 'durasi', 'hari', 'berapa'} and kata & {'pinjam', 'minjam', 'pinjem', 'minjem'}:
+        return (f"Buku boleh dipinjam selama {DURASI_PINJAM_HARI} hari sejak disetujui "
+                f"petugas. Kamu bisa meminjam paling banyak {BATAS_PINJAM_AKTIF} buku "
+                f"sekaligus. Sisa waktunya tampil di halaman 'Status Peminjaman'.")
+
+    return None
+
+
 def jawab_info_umum(pesan: str) -> Optional[str]:
-    """Tambahkan angka koleksi nyata kalau pertanyaannya soal jumlah/kategori."""
-    p = pesan.lower()
-    if not any(k in p for k in ('berapa', 'jumlah', 'banyak', 'kategori', 'koleksi')):
+    """
+    Tambahkan angka koleksi nyata kalau pertanyaannya memang soal jumlah koleksi.
+
+    Pemeriksaan kata "berapa" saja tidak cukup. "perpustakaan buka jam berapa"
+    memuat kata itu tetapi menanyakan jam operasional, dan sebelumnya dijawab
+    dengan jumlah judul buku. Karena itu jawaban koleksi hanya disusun ketika
+    pesan memuat kata ukuran DAN kata benda koleksi, serta tidak memuat penanda
+    waktu. Di luar itu kembalikan None supaya templat jam buka yang dipakai.
+    """
+    kata = set(re.sub(r'[^\w\s]', ' ', pesan.lower()).split())
+    if not (kata & _KATA_UKURAN):
+        return None
+    if not (kata & _KATA_KOLEKSI):
+        return None
+    if kata & _KATA_WAKTU:
         return None
     hasil = ringkasan_koleksi()
     if not hasil:
