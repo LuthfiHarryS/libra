@@ -10,9 +10,14 @@ import Navbar from '../components/Navbar'
 import BookCard from '../components/BookCard'
 import SkeletonCard from '../components/SkeletonCard'
 import CarouselRow from '../components/CarouselRow'
+import useJudulHalaman from '../hooks/useJudulHalaman'
 import useAuthStore from '../store/authStore'
 import api from '../services/api'
 import type { BookDetail, BorrowItem, ApiResponse, Book } from '../types'
+
+// Panjang aman untuk meta description; potongan yang lebih panjang dipotong
+// mesin telusur di tengah kalimat.
+const MAKS_DESKRIPSI = 155
 
 function BookDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -32,6 +37,19 @@ function BookDetailPage() {
   const [isLoadingRecs, setIsLoadingRecs] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isTogglingFav, setIsTogglingFav] = useState(false)
+
+  // Judul dan deskripsi mengikuti buku yang sedang dimuat. Tanpa ini seluruh
+  // halaman /buku/:id memakai judul statis dari index.html, sehingga mesin
+  // telusur melihat ratusan halaman kembar dan mengabaikan hampir semuanya.
+  useJudulHalaman(
+    book ? `${book.judul} — ${book.penulis}` : null,
+    book
+      ? (book.sinopsis?.trim()
+          ? book.sinopsis.trim().slice(0, MAKS_DESKRIPSI)
+          : `${book.judul} karya ${book.penulis}, kategori ${book.kategori_nama}. `
+            + 'Tersedia di Perpustakaan SMPN 1 Kemang lewat LIBRA.')
+      : null,
+  )
 
   useEffect(() => {
     if (!id) return

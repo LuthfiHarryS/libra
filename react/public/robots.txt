@@ -1,0 +1,23 @@
+# robots.txt LIBRA — perpuslibra.web.id
+#
+# Berkas ini WAJIB ada sebagai berkas nyata di public/. Blok fallback SPA di
+# Nginx (try_files $uri $uri/ /index.html) membalas 200 dengan isi index.html
+# untuk path apa pun yang tidak berupa berkas, sehingga tanpa berkas ini
+# crawler menerima HTML ketika meminta /robots.txt.
+#
+# Rute yang dilarang di bawah dijaga PrivateRoute atau AdminPrivateRoute di
+# App.tsx, jadi crawler tidak akan pernah melihat isinya. Melarangnya di sini
+# mencegah crawl budget terbuang dan mencegah halaman kosong terindeks.
+# Yang publik dan layak diindeks hanya / , /katalog , dan /buku/:id .
+
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /chat
+Disallow: /login
+Disallow: /daftar
+Disallow: /pinjaman
+Disallow: /favorit
+Disallow: /profil
+
+Sitemap: https://perpuslibra.web.id/sitemap.xml

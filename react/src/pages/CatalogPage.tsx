@@ -9,6 +9,7 @@ import CarouselRow from '../components/CarouselRow'
 import Pagination from '../components/Pagination'
 import EmptyState from '../components/EmptyState'
 import useDebounce from '../hooks/useDebounce'
+import useJudulHalaman from '../hooks/useJudulHalaman'
 import useAuthStore from '../store/authStore'
 import api from '../services/api'
 import type { Book, Category, ApiResponse, PaginatedResponse } from '../types'
@@ -49,6 +50,12 @@ function CatalogPage() {
   const [popularRecs, setPopularRecs] = useState<Book[]>([])
   const [isLoadingPersonal, setIsLoadingPersonal] = useState(false)
   const [isLoadingPopular, setIsLoadingPopular] = useState(false)
+
+  useJudulHalaman(
+    'Katalog Buku',
+    'Telusuri koleksi buku Perpustakaan SMPN 1 Kemang. Cari berdasarkan judul, '
+    + 'penulis, atau kategori, lalu ajukan peminjaman secara daring lewat LIBRA.',
+  )
 
   useEffect(() => {
     api.get<ApiResponse<Category[]>>('/categories')
