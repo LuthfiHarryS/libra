@@ -1,0 +1,39 @@
+# /etc/systemd/system/libra-chatbot.service
+# Layanan chatbot klasifikasi intent (LinearSVC + PySastrawi).
+#
+# Diikat ke 127.0.0.1; browser mencapainya lewat Nginx di https://perpuslibra.web.id/chat
+# sehingga tetap satu origin dan terenkripsi.
+#
+# 1 worker: model joblib dimuat sekali saat startup (~250 MB dengan numpy+sklearn).
+# Worker tambahan akan menggandakan pemakaian memori itu.
+
+[Unit]
+Description=LIBRA Chatbot Intent Classifier (Flask/gunicorn)
+After=network.target
+
+[Service]
+Type=notify
+User=libra
+Group=libra
+WorkingDirectory=/var/www/libra/python/chatbot
+Environment="PATH=/var/www/libra/python/.venv/bin"
+EnvironmentFile=/etc/libra/libra.env
+ExecStart=/var/www/libra/python/.venv/bin/gunicorn \
+    --bind 127.0.0.1:5001 \
+    --workers 1 \
+    --threads 4 \
+    --timeout 60 \
+    app:app
+
+Restart=always
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# Model .joblib ditulis ulang saat /train dipanggil
+ReadWritePaths=/var/www/libra/python
+
+[Install]
+WantedBy=multi-user.target

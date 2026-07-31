@@ -1,0 +1,41 @@
+# /etc/systemd/system/libra-cbf.service
+# Layanan rekomendasi Content-Based Filtering (TF-IDF + cosine similarity).
+#
+# Dipanggil hanya oleh PHP server-to-server, jadi diikat ke 127.0.0.1 —
+# tidak boleh dijangkau dari internet meski firewall lalai.
+#
+# 1 worker disengaja: TF-IDF di-fit sekali saat startup dan disimpan di memori
+# proses. Menambah worker berarti menggandakan matriks itu tanpa manfaat, karena
+# beban request-nya ringan.
+
+[Unit]
+Description=LIBRA CBF Recommender (Flask/gunicorn)
+After=network.target mariadb.service mysql.service
+Wants=mysql.service
+
+[Service]
+Type=notify
+User=libra
+Group=libra
+WorkingDirectory=/var/www/libra/python/cbf
+Environment="PATH=/var/www/libra/python/.venv/bin"
+EnvironmentFile=/etc/libra/libra.env
+ExecStart=/var/www/libra/python/.venv/bin/gunicorn \
+    --bind 127.0.0.1:5000 \
+    --workers 1 \
+    --threads 4 \
+    --timeout 60 \
+    app:app
+
+Restart=always
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/libra/python
+
+[Install]
+WantedBy=multi-user.target

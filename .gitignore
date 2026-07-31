@@ -51,8 +51,11 @@ libra_dump.sql
 start-demo.bat
 
 # ── Berkas operasional server ──
-# Memuat IP dan nama akun SSH mesin produksi.
-deploy/
+# deploy/ TIDAK lagi diabaikan sejak 2026-08-01. Sebelumnya dikecualikan karena
+# memuat IP dan nama akun SSH mesin produksi; keduanya kini ditulis sebagai
+# placeholder <IP_VPS> dan <USER_SSH>, dan seluruh kredensial di dalamnya hanya
+# contoh (GANTI_*). Repositori ini publik, jadi jangan pernah menaruh nilai
+# aslinya di sana.
 
 # ── Materi sumber & keluaran sementara (besar / berhak cipta) ──
 # Catatan: '#' hanya menjadi komentar bila berada di AWAL baris. Komentar yang
