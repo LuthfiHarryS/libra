@@ -88,6 +88,10 @@ akademik/
 # Keluaran uji, dibangkitkan ulang oleh python/scripts/uji_blackbox_chatbot.py.
 results/
 
+# Data mentah dari perpustakaan sekolah. Memuat nama petugas, pengirim, dan
+# penerima buku — orang sungguhan yang tidak pernah setuju namanya publik.
+data_sekolah/
+
 # ── Editor & OS ──
 .vscode/
 .idea/

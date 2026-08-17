@@ -153,10 +153,19 @@ def chat():
     except Exception:
         dinamis = None
 
-    # Mode 'hibrida': Gemini hanya dipanggil di titik yang selama ini buntu —
-    # classifier tidak yakin dan katalog tidak punya jawaban. Tujuh intent
-    # yang terukur di naskah tetap dilayani classifier apa adanya.
-    if MODE == 'hibrida' and dinamis is None and intent == 'tidak_dimengerti':
+    # Mode 'hibrida': Gemini dipanggil setiap kali katalog tidak menghasilkan
+    # apa-apa, tanpa memandang keyakinan classifier.
+    #
+    # Sebelumnya syaratnya intent == 'tidak_dimengerti', dan itu melewatkan
+    # kegagalan yang paling memalukan: classifier yakin tetapi keliru.
+    # "nilai matematika aku jelek" diklasifikasikan cek_status_pinjam dengan
+    # keyakinan 0.64, jadi tidak pernah sampai ke Gemini dan siswa dijawab
+    # soal status peminjaman.
+    #
+    # Konsekuensinya sapaan pun ikut memanggil API, karena katalog memang
+    # tidak menjawab sapaan. Tambahkan pengecualian di sini bila panggilannya
+    # ingin dihemat.
+    if MODE == 'hibrida' and dinamis is None:
         teks = gemini.jawab(req.message)
         if teks:
             return jsonify({
