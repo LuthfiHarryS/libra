@@ -16,6 +16,14 @@ Auth /train: shared secret via X-Train-Key header
 """
 import os
 
+# Dipanggil sebelum apa pun membaca os.environ di bawah — kalau tidak,
+# TRAIN_KEY dan MODE sudah terlanjur dibaca saat .env belum termuat.
+try:
+    from chatbot.muat_env import muat_env
+except ImportError:
+    from muat_env import muat_env  # type: ignore[no-redef]
+muat_env()
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pydantic import BaseModel, field_validator, ValidationError

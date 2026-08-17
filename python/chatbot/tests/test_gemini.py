@@ -39,14 +39,28 @@ class _Palsu:
 
 @pytest.fixture
 def kunci_ada(monkeypatch):
-    monkeypatch.setattr(gemini, 'API_KEY', 'kunci-uji')
+    monkeypatch.setenv('GEMINI_API_KEY', 'kunci-uji')
     monkeypatch.setattr(gemini, '_konteks', lambda pesan: "Ringkasan koleksi: 34 buku")
 
 
 def test_tanpa_kunci_langsung_none(monkeypatch):
-    monkeypatch.setattr(gemini, 'API_KEY', '')
+    monkeypatch.delenv('GEMINI_API_KEY', raising=False)
     assert gemini.jawab("jam buka perpustakaan?") is None
     assert gemini.tersedia() is False
+
+
+def test_kunci_kosong_dianggap_tidak_ada(monkeypatch):
+    """Baris 'GEMINI_API_KEY=' di .env menghasilkan string kosong."""
+    monkeypatch.setenv('GEMINI_API_KEY', '   ')
+    assert gemini.tersedia() is False
+    assert gemini.jawab("halo") is None
+
+
+def test_model_bisa_diganti_lewat_env(monkeypatch):
+    monkeypatch.delenv('GEMINI_MODEL', raising=False)
+    assert gemini._model() == gemini.MODEL_BAWAAN
+    monkeypatch.setenv('GEMINI_MODEL', 'gemini-3-pro')
+    assert gemini._model() == 'gemini-3-pro'
 
 
 def test_jawaban_normal(monkeypatch, kunci_ada):

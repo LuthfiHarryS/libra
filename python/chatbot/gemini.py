@@ -26,9 +26,22 @@ try:
 except ImportError:
     import katalog  # type: ignore[no-redef]
 
-API_KEY = os.environ.get('GEMINI_API_KEY', '')
-MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
+MODEL_BAWAAN = 'gemini-2.5-flash'
 BATAS_DETIK = 8
+
+
+def _kunci() -> str:
+    """
+    Dibaca saat dipakai, bukan saat modul diimpor.
+
+    Kalau dibaca saat impor, .env yang dimuat belakangan tidak akan
+    pernah terlihat dan kuncinya seolah-olah kosong padahal ada.
+    """
+    return os.environ.get('GEMINI_API_KEY', '').strip()
+
+
+def _model() -> str:
+    return os.environ.get('GEMINI_MODEL', '').strip() or MODEL_BAWAAN
 
 _URL = ("https://generativelanguage.googleapis.com/v1beta/models/"
         "{model}:generateContent")
@@ -47,7 +60,7 @@ Aturan yang tidak boleh dilanggar:
 
 def tersedia() -> bool:
     """Gemini hanya dipakai bila kuncinya benar-benar ada."""
-    return bool(API_KEY)
+    return bool(_kunci())
 
 
 def _konteks(pesan: str) -> str:
@@ -115,7 +128,8 @@ def jawab(pesan: str):
     menghasilkan None, tidak pernah melempar. Chatbot tidak boleh mati
     hanya karena layanan luar sedang bermasalah.
     """
-    if not API_KEY:
+    kunci = _kunci()
+    if not kunci:
         return None
 
     badan = json.dumps({
@@ -130,13 +144,13 @@ def jawab(pesan: str):
     }).encode('utf-8')
 
     permintaan = urllib.request.Request(
-        _URL.format(model=MODEL),
+        _URL.format(model=_model()),
         data=badan,
         headers={
             'Content-Type': 'application/json',
             # Kunci lewat header, bukan query string, supaya tidak ikut
             # tercatat di log akses maupun riwayat proxy.
-            'x-goog-api-key': API_KEY,
+            'x-goog-api-key': kunci,
         },
         method='POST',
     )
