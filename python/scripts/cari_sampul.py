@@ -100,6 +100,78 @@ def dari_openlibrary(isbn: str):
         f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg?default=false")
 
 
+def _kata(teks: str) -> set:
+    return {k for k in re.findall(r'[a-z0-9]+', (teks or '').lower()) if len(k) > 2}
+
+
+def judul_cocok(dicari: str, ditemukan: str) -> bool:
+    """
+    Penjaga untuk pencarian lewat judul.
+
+    Tanpa ini, "SEL" bisa mengambil sampul buku mana pun yang judulnya
+    memuat kata itu, dan katalog sekolah jadi berisi sampul yang salah —
+    lebih buruk daripada tidak ada sampul sama sekali.
+    """
+    a, b = _kata(dicari), _kata(ditemukan)
+    if not a or not b:
+        return False
+    return len(a & b) / len(a) >= 0.7
+
+
+def _gambar_dari_volume(vol: dict):
+    """URL sampul terbesar dari satu volume, atau None."""
+    tautan = (vol.get('volumeInfo') or {}).get('imageLinks') or {}
+    for kunci in ('extraLarge', 'large', 'medium', 'small', 'thumbnail'):
+        if tautan.get(kunci):
+            # &edge=curl menambahkan lipatan palsu di gambar.
+            return (tautan[kunci].replace('&edge=curl', '')
+                                 .replace('http://', 'https://'))
+    return None
+
+
+def _detail_volume(vol_id: str):
+    """
+    imageLinks kadang kosong di hasil pencarian tetapi ada di endpoint
+    detail. Satu permintaan tambahan ini yang menyelamatkan buku-buku
+    yang tadinya tercatat 'tanpa gambar'.
+    """
+    param = {'key': KUNCI_BOOKS} if KUNCI_BOOKS else {}
+    try:
+        r = SESI.get(f'https://www.googleapis.com/books/v1/volumes/{vol_id}',
+                     params=param, timeout=15)
+        if r.status_code != 200:
+            return None
+        return _gambar_dari_volume(r.json())
+    except (requests.RequestException, ValueError):
+        return None
+
+
+def dari_google_judul(judul: str, penulis: str):
+    """Cadangan saat ISBN tidak terdaftar — sering terjadi pada terbitan lokal."""
+    param = {'q': f'intitle:{judul}', 'maxResults': 5, 'country': 'ID'}
+    if KUNCI_BOOKS:
+        param['key'] = KUNCI_BOOKS
+    try:
+        r = SESI.get('https://www.googleapis.com/books/v1/volumes',
+                     params=param, timeout=15)
+        if r.status_code == 429:
+            return None, 'dibatasi'
+        if r.status_code != 200:
+            return None, 'tidak ada'
+        item = r.json().get('items') or []
+    except (requests.RequestException, ValueError):
+        return None, 'jaringan'
+
+    for vol in item:
+        info = vol.get('volumeInfo') or {}
+        if not judul_cocok(judul, info.get('title', '')):
+            continue
+        url = _gambar_dari_volume(vol) or _detail_volume(vol.get('id', ''))
+        if url:
+            return unduh(url)
+    return None, 'tidak ada'
+
+
 def dari_google(isbn: str, percobaan: int = 3):
     """
     Google Books dicoba belakangan karena batas lajunya ketat untuk
@@ -132,13 +204,9 @@ def dari_google(isbn: str, percobaan: int = 3):
         if not item:
             return None, 'tidak ada'
 
-        tautan = item.get('volumeInfo', {}).get('imageLinks') or {}
-        for kunci in ('extraLarge', 'large', 'medium', 'small', 'thumbnail'):
-            if tautan.get(kunci):
-                # &edge=curl menambahkan lipatan palsu di gambar.
-                url = (tautan[kunci].replace('&edge=curl', '')
-                                    .replace('http://', 'https://'))
-                return unduh(url)
+        url = _gambar_dari_volume(item) or _detail_volume(item.get('id', ''))
+        if url:
+            return unduh(url)
         return None, 'tanpa gambar'
 
     return None, 'dibatasi'
@@ -197,7 +265,7 @@ def main():
             return
         print(f"Tujuan: {TUJUAN}\n")
 
-        ketemu = {'openlibrary': 0, 'google': 0}
+        ketemu = {'openlibrary': 0, 'google-isbn': 0, 'google-judul': 0}
         gagal = {}
         for i, b in enumerate(daftar, 1):
             isbn = re.sub(r'[^0-9X]', '', (b['isbn'] or '').upper())
@@ -208,7 +276,10 @@ def main():
             sumber = 'openlibrary'
             if isi is None and not arg.tanpa_google:
                 isi, alasan = dari_google(isbn)
-                sumber = 'google'
+                sumber = 'google-isbn'
+            if isi is None and not arg.tanpa_google and alasan != 'dibatasi':
+                isi, alasan = dari_google_judul(b['judul'], b['penulis'])
+                sumber = 'google-judul'
 
             if isi is None:
                 gagal[alasan] = gagal.get(alasan, 0) + 1
@@ -232,7 +303,9 @@ def main():
 
         total = sum(ketemu.values())
         print(f"\nKetemu {total} dari {len(daftar)} buku "
-              f"(Open Library {ketemu['openlibrary']}, Google {ketemu['google']}).")
+              f"(Open Library {ketemu['openlibrary']}, "
+              f"Google via ISBN {ketemu['google-isbn']}, "
+              f"Google via judul {ketemu['google-judul']}).")
         if gagal:
             print("Yang tidak dapat sampul:")
             for alasan, n in sorted(gagal.items(), key=lambda x: -x[1]):
