@@ -69,26 +69,21 @@ python/scripts/crops2/
 # Termasuk Buku Pedoman Penulisan Ilmiah
 *.pdf
 
-# ── Naskah Penulisan Ilmiah & berkas sidang ──
-# *.pdf dan *.docx sudah tertutup di atas, tetapi naskah sumbernya tidak.
-# Repositori ini publik: yang dipublikasikan adalah kodenya, bukan tulisannya.
+# ── Materi Penulisan Ilmiah ──
+# Seluruh naskah, gambar, daftar pustaka, berkas sidang, dan presentasi kini
+# berada di satu folder. Repositori ini publik: yang dipublikasikan adalah
+# kodenya, bukan tulisannya.
+#
+# Termasuk akademik/dokum/ — foto kepala sekolah, petugas perpustakaan, dan
+# siswa SMP yang mengisi SUS. Orang sungguhan yang dapat dikenali, sebagian di
+# bawah umur, dan tidak boleh dipublikasikan tanpa persetujuan tertulis.
+akademik/
+
+# Penjaga lapis kedua, kalau-kalau naskah baru tercecer di luar akademik/.
 *.tex
 *.tex.BACKUP*
 *.lyx
 *.lyx~
-BACA.txt
-lyx/
-lyx_en/
-kiriman_latex/
-pendaftaransidang/
-presentasi/
-# 49 gambar yang dirujuk naskah, bukan aset aplikasi.
-gambar/
-
-# Foto kepala sekolah, petugas perpustakaan, dan siswa SMP yang mengisi SUS.
-# Orang sungguhan yang dapat dikenali, sebagian di bawah umur — tidak boleh
-# dipublikasikan tanpa persetujuan tertulis, dan tetap tidak perlu ada di sini.
-dokum/
 
 # Keluaran uji, dibangkitkan ulang oleh python/scripts/uji_blackbox_chatbot.py.
 results/
