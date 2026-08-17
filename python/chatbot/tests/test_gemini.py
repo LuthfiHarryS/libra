@@ -87,6 +87,48 @@ def test_konteks_katalog_ikut_terkirim(monkeypatch, kunci_ada):
     assert terkirim['header'].get('X-goog-api-key') == 'kunci-uji'
 
 
+def test_berpikir_dimatikan_dan_jatah_cukup(monkeypatch, kunci_ada):
+    """
+    Gemini 2.5 memakai token berpikir dari jatah maxOutputTokens. Dibiarkan
+    menyala dengan jatah kecil, jawabannya terpotong di tengah kalimat —
+    kegagalan yang sudah pernah terjadi, jadi dikunci di sini.
+    """
+    terkirim = {}
+
+    def tangkap(permintaan, timeout=None):
+        terkirim['badan'] = json.loads(permintaan.data.decode())
+        return _Palsu(_balasan("ok"))
+
+    monkeypatch.setattr(gemini.urllib.request, 'urlopen', tangkap)
+    gemini.jawab("halo")
+
+    cfg = terkirim['badan']['generationConfig']
+    assert cfg['thinkingConfig']['thinkingBudget'] == 0
+    assert cfg['maxOutputTokens'] >= 512
+
+
+def test_semua_kandidat_topik_dicoba(monkeypatch):
+    """
+    ekstrak_topik menyerah pada kalimat panjang informal — persis kalimat
+    yang sampai ke Gemini. Kandidat lain harus tetap dicoba.
+    """
+    monkeypatch.setattr(gemini.katalog, 'ringkasan_koleksi', lambda: None)
+    monkeypatch.setattr(gemini.katalog, 'buku_terpopuler', lambda: None)
+    monkeypatch.setattr(gemini.katalog, 'ekstrak_topik', lambda p: None)
+    monkeypatch.setattr(gemini.katalog, 'kandidat_topik', lambda p: ['kliping', 'cuaca'])
+
+    def cari(topik):
+        if topik != 'cuaca':
+            return None
+        return [{'judul': 'Air Udara Cuaca', 'penulis': 'Wawan',
+                 'kategori_nama': 'Sains', 'stok_tersedia': 3, 'stok_total': 3}]
+
+    monkeypatch.setattr(gemini.katalog, 'cari_judul', cari)
+    monkeypatch.setattr(gemini.katalog, 'cari_per_topik', lambda t: (0, []))
+
+    assert "Air Udara Cuaca" in gemini._konteks("bikin kliping tentang cuaca")
+
+
 @pytest.mark.parametrize("kegagalan", [
     urllib.error.URLError("jaringan mati"),
     urllib.error.HTTPError("u", 429, "kuota habis", {}, None),

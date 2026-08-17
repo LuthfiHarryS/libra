@@ -79,13 +79,24 @@ def _konteks(pesan: str) -> str:
     except Exception:
         pass
 
-    topik = None
+    # ekstrak_topik menyerah pada kalimat panjang dan informal — persis
+    # jenis kalimat yang sampai ke Gemini, karena classifier pun menyerah
+    # di situ. Maka setiap kata kandidat dicoba, bukan cuma satu topik.
+    kandidat = []
     try:
-        topik = katalog.ekstrak_topik(pesan)
+        satu = katalog.ekstrak_topik(pesan)
+        if satu:
+            kandidat.append(satu)
+        for k in katalog.kandidat_topik(pesan):
+            if k not in kandidat:
+                kandidat.append(k)
     except Exception:
         pass
 
-    if topik:
+    terpakai = 0
+    for topik in kandidat:
+        if terpakai >= 3:  # cukup untuk menambatkan; lebih dari itu jadi bising
+            break
         try:
             baris = katalog.cari_judul(topik)
             if baris:
@@ -95,7 +106,9 @@ def _konteks(pesan: str) -> str:
                     f"tersedia {b['stok_tersedia']} dari {b['stok_total']}"
                     for b in baris
                 )
-                bagian.append(f"Judul yang cocok: {daftar}")
+                bagian.append(f"Judul yang cocok dengan '{topik}': {daftar}")
+                terpakai += 1
+                continue
         except Exception:
             pass
 
@@ -106,6 +119,7 @@ def _konteks(pesan: str) -> str:
                     f"Pencarian '{topik}' menemukan {jumlah} buku: "
                     + ", ".join(judul)
                 )
+                terpakai += 1
         except Exception:
             pass
 
@@ -140,7 +154,16 @@ def jawab(pesan: str):
                         f"Pertanyaan siswa: {pesan}"
             }]
         }],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 300},
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 512,
+            # Gemini 2.5 berpikir dulu sebelum menjawab, dan token berpikir
+            # ikut memakan maxOutputTokens. Dibiarkan menyala, jatahnya habis
+            # untuk berpikir dan jawabannya terpotong di tengah kalimat.
+            # Pertanyaan di sini sederhana dan datanya sudah disediakan, jadi
+            # tidak ada yang perlu dipikir panjang.
+            "thinkingConfig": {"thinkingBudget": 0},
+        },
     }).encode('utf-8')
 
     permintaan = urllib.request.Request(
