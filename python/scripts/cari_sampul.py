@@ -27,6 +27,13 @@ import pymysql.cursors
 import requests
 from PIL import Image
 
+# .env dimuat sebelum satu pun os.environ dibaca di bawah — kalau tidak,
+# kunci dan pengaturan basis data terlanjur terbaca sebagai kosong.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from chatbot.muat_env import muat_env  # noqa: E402
+
+muat_env()
+
 TUJUAN = Path(os.environ.get(
     'LIBRA_COVER_DIR', r'D:\xampp\htdocs\libra\uploads\covers'))
 URL_PUBLIK = '/uploads/covers/{nama}.webp'
@@ -39,6 +46,11 @@ DB = dict(
     charset='utf8mb4',
     cursorclass=pymysql.cursors.DictCursor,
 )
+
+# Kunci Books API dari Google Cloud Console. Tanpa kunci, Google membatasi
+# permintaan per IP dan hampir selalu membalas 429 setelah beberapa buku.
+# Kunci ini berbeda dari kunci Gemini: kunci AI Studio ditolak Books API.
+KUNCI_BOOKS = os.environ.get('GOOGLE_BOOKS_API_KEY', '').strip()
 
 JEDA = 0.6           # detik antar permintaan, supaya tidak dibatasi server
 LEBAR_MAKS = 500     # sampul lebih lebar dari ini tidak menambah apa pun di kartu
@@ -94,11 +106,15 @@ def dari_google(isbn: str, percobaan: int = 3):
     permintaan tanpa kunci API. 429 ditunggu dengan jeda menaik, bukan
     dianggap 'buku tidak ada'.
     """
+    param = {'q': f'isbn:{isbn}', 'country': 'ID'}
+    if KUNCI_BOOKS:
+        param['key'] = KUNCI_BOOKS
+
     tunggu = 2
     for _ in range(percobaan):
         try:
             r = SESI.get('https://www.googleapis.com/books/v1/volumes',
-                         params={'q': f'isbn:{isbn}'}, timeout=15)
+                         params=param, timeout=15)
         except requests.RequestException:
             return None, 'jaringan'
 
@@ -172,6 +188,8 @@ def main():
             daftar = daftar[:arg.batas]
 
         print(f"Buku tanpa sampul & punya ISBN : {len(daftar)}")
+        print(f"Kunci Google Books             : "
+              f"{'ada' if KUNCI_BOOKS else 'TIDAK ADA — Google akan membatasi'}")
         if tanpa_isbn:
             print(f"Buku tanpa sampul & tanpa ISBN : {tanpa_isbn} (tidak bisa dicari)")
         if not arg.terapkan:
