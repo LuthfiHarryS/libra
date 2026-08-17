@@ -2,7 +2,14 @@
 <html lang="id" data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
+    <!-- favicon.ico harus tetap ada di root: perayap favicon Google meminta
+         /favicon.ico lebih dulu, dan tanpa berkasnya fallback SPA Nginx
+         membalas index.html sehingga hasil pencarian memakai ikon globe. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/favicon-96.png" sizes="96x96" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1E4D6B" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LIBRA — Perpustakaan Digital</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

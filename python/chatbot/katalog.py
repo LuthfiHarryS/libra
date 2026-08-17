@@ -147,6 +147,34 @@ def cari_per_kategori(kategori: str):
         return None
 
 
+def cari_judul(topik: str):
+    """
+    Baris buku yang JUDULNYA memuat `topik`, lengkap dengan kategori dan stok.
+
+    Sengaja mencocokkan kolom judul saja, bukan indeks FULLTEXT gabungan
+    (judul, penulis, sinopsis) seperti cari_per_topik. Pencocokan yang sempit
+    itulah pengamannya: kata umum seperti "kategori" atau "perpustakaan" tidak
+    akan pernah cocok dengan satu judul pun, sehingga pertanyaan koleksi dan
+    pertanyaan bantuan tidak ikut terbajak menjadi pertanyaan atribut judul.
+
+    None kalau DB tidak terjangkau.
+    """
+    try:
+        with _conn() as c, c.cursor() as cur:
+            cur.execute(
+                """SELECT b.judul, b.penulis, k.nama AS kategori_nama,
+                          b.stok_tersedia, b.stok_total
+                   FROM buku b LEFT JOIN kategori k ON k.id = b.kategori_id
+                   WHERE b.judul LIKE %s
+                   ORDER BY CHAR_LENGTH(b.judul), b.judul
+                   LIMIT %s""",
+                (f'%{topik}%', MAKS_SEBUT),
+            )
+            return cur.fetchall()
+    except Exception:
+        return None
+
+
 def cari_per_topik(topik: str):
     """(jumlah, [judul...]) hasil pencarian FULLTEXT pada judul/penulis/sinopsis."""
     try:
@@ -227,6 +255,122 @@ def _keterangan_penulis(rows) -> str:
         if satu:
             return f" karya {satu}"
     return ""
+
+
+# Kata yang menandai pertanyaan tentang atribut sebuah judul. "tersedia" dan
+# "ada" sengaja tidak dimasukkan: keduanya sudah tertangani dengan benar oleh
+# intent cari_buku dan memasukkannya justru akan membajak perilaku yang sehat.
+_KATA_ATRIBUT = {
+    'kategori': 'kategori', 'kategorinya': 'kategori', 'genre': 'kategori',
+    'genrenya': 'kategori', 'termasuk': 'kategori',
+    'penulis': 'penulis', 'penulisnya': 'penulis', 'pengarang': 'penulis',
+    'pengarangnya': 'penulis', 'karya': 'penulis', 'nulis': 'penulis',
+    'menulis': 'penulis',
+    'sinopsis': 'sinopsis', 'sinopsisnya': 'sinopsis', 'ringkasan': 'sinopsis',
+    'ringkasannya': 'sinopsis', 'isinya': 'sinopsis',
+    'eksemplar': 'stok', 'stok': 'stok', 'stoknya': 'stok',
+}
+
+# Kata tanya dan kata pengisi yang tidak boleh dikira bagian judul. Disimpan
+# terpisah dari BUKAN_TOPIK supaya perilaku cari_buku yang sudah diukur pada
+# subbab 3.8.2 tidak ikut berubah.
+_KATA_TANYA = {
+    'siapa', 'siapakah', 'kapan', 'bagaimana', 'gimana', 'kenapa', 'mengapa',
+    'dimana', 'mana', 'apakah', 'kalau', 'judul', 'judulnya', 'tolong',
+    'menulis', 'nulis', 'bikin', 'buat',
+    # "cara" ikut dibuang karena kata tanya prosedural, meskipun katalog
+    # memuat judul yang diawali kata itu. Buku semacam "Cara Menentukan
+    # Golongan Darah" tetap terjangkau lewat kata lain pada judulnya.
+    'cara', 'caranya',
+}
+
+
+def jawab_detail_buku(pesan: str) -> Optional[str]:
+    """
+    Jawaban untuk pertanyaan atribut sebuah judul. None -> bukan urusan fungsi ini.
+
+    Classifier tidak punya kelas untuk pertanyaan semacam ini, dan kata
+    penandanya justru condong ke intent lain: pada data latih, "penulis" tidak
+    pernah muncul sedangkan "kategori" hanya ada di info_umum dan
+    bantuan_sistem. Akibatnya "Negeri 5 Menara kategorinya apa" diklasifikasi
+    sebagai info_umum lalu dijawab jam buka. Fungsi ini memotong keadaan itu
+    di tahap penyusunan jawaban, tanpa mengubah dataset maupun model.
+
+    Dua syarat harus terpenuhi bersamaan supaya tidak membajak pertanyaan lain:
+    pesan memuat kata tanya atribut, DAN memuat kata yang benar-benar cocok
+    dengan judul di katalog.
+    """
+    kata = set(re.sub(r'[^\w\s]', ' ', pesan.lower()).split())
+    diminta = {_KATA_ATRIBUT[k] for k in kata if k in _KATA_ATRIBUT}
+    if not diminta:
+        return None
+
+    # Kandidat judul: kata di luar daftar kata umum, kata atribut, dan kata
+    # tanya. Kata tanya harus ikut dibuang karena katalog memuat judul yang
+    # diawali kata tanya — tanpa penyaringan ini "siapa penulis Negeri 5
+    # Menara" menunjuk buku "Siapa Bilang Matematika Sulit 3".
+    kandidat = [k for k in kandidat_topik(pesan)
+                if k not in _KATA_ATRIBUT and k not in _KATA_TANYA]
+    if not kandidat:
+        return None
+
+    # Judul dipilih berdasarkan BERAPA BANYAK kandidat yang menunjuk judul
+    # yang sama. Satu kata pendek saja tidak cukup: katalog memuat judul yang
+    # diawali kata lazim seperti "Cara ...", sehingga pertanyaan bantuan
+    # "cara filter buku per kategori gimana" akan terbaca sebagai pertanyaan
+    # atribut judul kalau satu kecocokan sudah dianggap sah.
+    hasil = [(k, cari_judul(k)) for k in kandidat]
+    hasil = [(k, rows) for k, rows in hasil if rows]
+    if not hasil:
+        return None
+
+    # Berapa kandidat yang menunjuk judul yang sama.
+    cocok = {}
+    for k, rows in hasil:
+        for r in rows:
+            n, baris = cocok.get(r['judul'], (0, r))
+            cocok[r['judul']] = (n + 1, baris)
+
+    judul_pilihan = max(cocok, key=lambda j: cocok[j][0])
+    n_kandidat, b = cocok[judul_pilihan]
+
+    if n_kandidat < 2:
+        # Hanya satu kata yang menunjuk judul ini, jadi kata itu harus benar-
+        # benar menciri: cocok dengan tepat satu judul di katalog. Kata lazim
+        # seperti "cara" mengenai beberapa judul sekaligus ("Cara Menentukan
+        # Golongan Darah" dan lainnya) sehingga pertanyaan bantuan tidak ikut
+        # terbaca sebagai pertanyaan atribut judul.
+        menciri = [rows for k, rows in hasil if len(rows) == 1]
+        if not menciri:
+            return None
+        b = menciri[0][0]
+        judul_pilihan = b['judul']
+
+    judul = b['judul']
+    bagian = []
+    if 'kategori' in diminta:
+        kat = (b.get('kategori_nama') or '').strip()
+        bagian.append(f'termasuk kategori {kat}' if kat
+                      else 'belum diberi kategori')
+    if 'penulis' in diminta:
+        pen = (b.get('penulis') or '').strip()
+        bagian.append(f'ditulis oleh {pen}' if pen else 'penulisnya belum dicatat')
+    if 'stok' in diminta:
+        total = b.get('stok_total')
+        bagian.append(f'tercatat {total} eksemplar' if total is not None
+                      else 'jumlah eksemplarnya belum dicatat')
+    if 'sinopsis' in diminta and not bagian:
+        bagian.append('sinopsis lengkapnya bisa dibaca di halaman Detail Buku')
+
+    kalimat = f'"{judul}" ' + ', '.join(bagian) + '.'
+
+    tersedia = b.get('stok_tersedia')
+    if tersedia is not None:
+        kalimat += (' Saat ini bisa langsung dipinjam.' if tersedia > 0
+                    else ' Saat ini sedang dipinjam semua.')
+    if len(cocok) > 1:
+        kalimat += ' Kalau bukan buku ini, coba telusuri lewat halaman Katalog ya.'
+    return kalimat
 
 
 def jawab_cari_buku(pesan: str) -> Optional[str]:

@@ -95,14 +95,25 @@ def chat():
     # tetap dipakai, sehingga chatbot tidak pernah gagal total.
     dinamis = None
     try:
-        if intent == 'cari_buku':
-            dinamis = katalog.jawab_cari_buku(req.message)
-        elif intent == 'rekomendasi_buku':
-            dinamis = katalog.jawab_rekomendasi(req.message)
-        elif intent == 'prosedur_pinjam':
-            dinamis = katalog.jawab_prosedur_pinjam(req.message)
-        elif intent == 'info_umum':
-            dinamis = katalog.jawab_info_umum(req.message)
+        # Pertanyaan atribut sebuah judul ("X kategorinya apa", "siapa penulis
+        # X") diperiksa lebih dulu, tanpa memandang intent. Classifier tidak
+        # punya kelas untuk pertanyaan semacam ini dan kata penandanya condong
+        # ke info_umum, sehingga tanpa langkah ini jawabannya jadi jam buka.
+        # Fungsinya mengembalikan None kecuali pesan memuat kata tanya atribut
+        # sekaligus judul yang benar-benar ada di katalog.
+        dinamis = katalog.jawab_detail_buku(req.message)
+
+        # Rantai berbasis intent hanya dijalankan bila langkah di atas tidak
+        # menghasilkan apa-apa; kalau tidak, jawaban detail akan tertimpa.
+        if dinamis is None:
+            if intent == 'cari_buku':
+                dinamis = katalog.jawab_cari_buku(req.message)
+            elif intent == 'rekomendasi_buku':
+                dinamis = katalog.jawab_rekomendasi(req.message)
+            elif intent == 'prosedur_pinjam':
+                dinamis = katalog.jawab_prosedur_pinjam(req.message)
+            elif intent == 'info_umum':
+                dinamis = katalog.jawab_info_umum(req.message)
     except Exception:
         dinamis = None
 

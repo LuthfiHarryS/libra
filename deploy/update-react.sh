@@ -28,9 +28,9 @@ if [[ ! -f "$SUMBER/index.html" ]]; then
     exit 1
 fi
 
-# Sitemap dan robots.txt harus ikut, kalau tidak Google menerima index.html
-# untuk /robots.txt akibat fallback SPA di Nginx.
-for wajib in robots.txt sitemap.xml; do
+# Sitemap, robots.txt, dan favicon.ico harus ikut, kalau tidak Google menerima
+# index.html untuk /robots.txt maupun /favicon.ico akibat fallback SPA di Nginx.
+for wajib in robots.txt sitemap.xml favicon.ico; do
     if [[ ! -f "$SUMBER/$wajib" ]]; then
         echo "PERINGATAN: '$wajib' tidak ada di build. Pastikan berkas itu berada" >&2
         echo "            di react/public/ sebelum menjalankan npm run build." >&2

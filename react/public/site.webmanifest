@@ -1,0 +1,16 @@
+{
+  "name": "LIBRA — Perpustakaan Digital SMPN 1 Kemang",
+  "short_name": "LIBRA",
+  "description": "Layanan Informasi Buku & Referensi Akademik SMP Negeri 1 Kemang.",
+  "lang": "id",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FDF8F2",
+  "theme_color": "#1E4D6B",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
