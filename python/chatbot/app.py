@@ -21,6 +21,7 @@ from flask_cors import CORS
 from pydantic import BaseModel, field_validator, ValidationError
 
 from classifier import load_or_train, predict_intent, train_and_save
+import gemini
 import katalog
 from dataset import get_training_data, REPLIES
 
@@ -38,6 +39,14 @@ CORS(app, origins=[
 # Shared secret untuk endpoint /train. Set via env var sebelum start Flask.
 # Kalau env var tidak di-set, /train auto-block (return 503) — fail-secure.
 TRAIN_KEY = os.environ.get('CHATBOT_TRAIN_KEY', '')
+
+# Cabang eksperimen. Bawaannya 'klasifikasi' — persis perilaku di main,
+# sehingga menjalankan cabang ini tanpa menyetel apa pun tidak mengubah
+# hasil pengukuran di naskah.
+#   klasifikasi : hanya NB/SVM + katalog
+#   hibrida     : Gemini hanya saat classifier menyerah (tidak_dimengerti)
+#   gemini      : Gemini lebih dulu, classifier jadi cadangan
+MODE = os.environ.get('CHATBOT_MODE', 'klasifikasi')
 
 # Module-level initialization — Flask 3.x pattern (no before_first_request)
 # Load joblib jika ada, else train dari dataset.py dan simpan
@@ -58,7 +67,13 @@ class ChatRequest(BaseModel):
 @app.route('/health')
 def health():
     """Health check — D-08: returns {"status": "ok"}."""
-    return jsonify({"status": "ok"})
+    # Mode dan kesiapan kunci ikut dilaporkan supaya saat demo kamu tahu
+    # jalur mana yang sedang aktif tanpa membaca env var di server.
+    return jsonify({
+        "status": "ok",
+        "mode": MODE,
+        "gemini_siap": gemini.tersedia(),
+    })
 
 
 @app.route('/chat', methods=['POST'])
@@ -85,6 +100,19 @@ def chat():
         return jsonify({"error": "message cannot be empty"}), 400
 
     intent, confidence, reply = predict_intent(req.message, vectorizer, clf_lsvc, REPLIES)
+
+    # Mode 'gemini': model bahasa dicoba lebih dulu. Intent tetap dihitung
+    # di atas supaya angkanya bisa dibandingkan berdampingan pada pesan
+    # yang sama, bukan supaya dipakai menjawab.
+    if MODE == 'gemini':
+        teks = gemini.jawab(req.message)
+        if teks:
+            return jsonify({
+                "intent": intent,
+                "confidence": confidence,
+                "reply": teks,
+                "sumber": "gemini",
+            })
 
     # Jawaban dinamis dari katalog. Classifier tetap yang menentukan intent;
     # tahap ini hanya mengganti template statis dengan kalimat yang menyebut
@@ -116,6 +144,19 @@ def chat():
                 dinamis = katalog.jawab_info_umum(req.message)
     except Exception:
         dinamis = None
+
+    # Mode 'hibrida': Gemini hanya dipanggil di titik yang selama ini buntu —
+    # classifier tidak yakin dan katalog tidak punya jawaban. Tujuh intent
+    # yang terukur di naskah tetap dilayani classifier apa adanya.
+    if MODE == 'hibrida' and dinamis is None and intent == 'tidak_dimengerti':
+        teks = gemini.jawab(req.message)
+        if teks:
+            return jsonify({
+                "intent": intent,
+                "confidence": confidence,
+                "reply": teks,
+                "sumber": "gemini",
+            })
 
     return jsonify({
         "intent": intent,
