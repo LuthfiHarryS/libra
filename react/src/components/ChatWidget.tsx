@@ -1,6 +1,6 @@
 // CHAT-01: Floating chat widget — FAB + panel, visible to authenticated siswa only
-// Chatbot: layanan Flask klasifikasi intent (LinearSVC) pada port 5001, endpoint /chat.
-// Request  {message} -> Response {intent, confidence, reply}
+// Chatbot: layanan Flask pada port 5001, endpoint /chat.
+// Request  {message, riwayat} -> Response {intent, confidence, reply, sumber}
 // Balasan disusun dari tabel REPLIES per intent di sisi layanan, bukan model generatif.
 import { useState, useEffect, useRef } from 'react'
 import { MessageCircle, X, Send } from 'lucide-react'
@@ -81,7 +81,17 @@ function ChatWidget() {
     setIsLoading(true)
 
     try {
-      const res = await axios.post<ChatResponse>(CHATBOT_URL, { message: userMsg })
+      // Riwayat ikut dikirim supaya pertanyaan lanjutan seperti "jelaskan
+      // lebih detail" punya rujukan. Layanan chat tidak menyimpan sesi, jadi
+      // percakapan hanya hidup selama panel ini terbuka.
+      const riwayat = messages.map(m => ({
+        peran: m.role === 'user' ? 'siswa' : 'libra',
+        teks: m.text,
+      }))
+      const res = await axios.post<ChatResponse>(CHATBOT_URL, {
+        message: userMsg,
+        riwayat,
+      })
       setMessages(prev => [...prev, { role: 'bot', text: res.data.reply }])
     } catch (err) {
       console.error('[ChatWidget] chatbot error:', err)

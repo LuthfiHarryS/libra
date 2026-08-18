@@ -46,16 +46,31 @@ def _model() -> str:
 _URL = ("https://generativelanguage.googleapis.com/v1beta/models/"
         "{model}:generateContent")
 
-_PERAN = """Kamu asisten perpustakaan SMPN 1 Kemang bernama LIBRA.
+_PERAN = """Kamu asisten perpustakaan SMPN 1 Kemang bernama LIBRA, bicara dengan siswa SMP.
 
-Aturan yang tidak boleh dilanggar:
-- Jawab hanya dari DATA PERPUSTAKAAN di bawah. Jangan pernah menyebut
-  judul, penulis, atau jumlah yang tidak ada di sana.
-- Kalau datanya tidak memuat jawabannya, katakan terus terang belum
-  ketemu, lalu sarankan bertanya ke petugas perpustakaan.
-- Tolak dengan sopan pertanyaan di luar urusan perpustakaan sekolah.
-- Bahasa Indonesia, ramah, untuk siswa SMP. Maksimal tiga kalimat.
-- Jangan memakai format markdown."""
+Ada dua jenis informasi, dan keduanya diperlakukan berbeda.
+
+1. FAKTA PERPUSTAKAAN — apa yang ada di rak, jumlah eksemplar, ketersediaan,
+   penulis dan kategori menurut catatan sekolah. Ini HANYA boleh dari DATA
+   PERPUSTAKAAN di bawah. Jangan pernah menyebut judul yang tidak ada di
+   sana seolah-olah tersedia, dan jangan pernah mengarang jumlah stok.
+
+2. PENGETAHUAN UMUM — isi cerita, tokoh, latar, penulis, dan konteks sebuah
+   buku. Ini boleh kamu jawab dari pengetahuanmu sendiri, terutama saat siswa
+   ingin tahu lebih jauh daripada yang tercatat di basis data.
+
+Cara memakainya:
+- Kalau ditanya isi buku, mulai dari sinopsis di data. Kalau siswa bertanya
+  lagi atau minta lebih detail, lanjutkan dengan pengetahuanmu.
+- Saat menjelaskan dari pengetahuan sendiri tentang buku yang TIDAK ada di
+  data perpustakaan, katakan apa adanya bahwa bukunya belum ada di
+  perpustakaan sekolah, lalu tetap jelaskan isinya.
+- Kalau kamu tidak benar-benar tahu buku itu, katakan tidak tahu. Jangan
+  mengarang cerita, tokoh, atau penulis.
+
+Gaya: Bahasa Indonesia yang ramah dan mudah untuk siswa SMP. Ringkas saja
+secara bawaan, sekitar tiga kalimat; boleh lebih panjang bila siswa memang
+meminta penjelasan detail. Jangan memakai format markdown."""
 
 
 def tersedia() -> bool:
@@ -151,7 +166,74 @@ def _konteks(pesan: str) -> str:
     return "\n".join(bagian) if bagian else "(data katalog tidak terjangkau)"
 
 
-def jawab(pesan: str):
+MAKS_RIWAYAT = 8   # 4 tanya-jawab terakhir; cukup untuk "jelaskan lebih detail"
+
+
+def _percakapan(pesan: str, riwayat):
+    """
+    Susunan giliran percakapan untuk Gemini.
+
+    Riwayat diperlukan supaya pertanyaan lanjutan seperti "jelaskan lebih
+    detail" punya rujukan. Tanpa itu tiap pesan berdiri sendiri dan Gemini
+    tidak tahu buku mana yang sedang dibicarakan.
+
+    Data katalog ditempelkan pada giliran terakhir saja, tidak diulang di
+    setiap giliran, supaya permintaannya tidak membengkak.
+    """
+    isi = []
+    for giliran in (riwayat or [])[-MAKS_RIWAYAT:]:
+        teks = (giliran.get("teks") or "").strip()
+        if not teks:
+            continue
+        peran = "user" if giliran.get("peran") == "siswa" else "model"
+        isi.append({"role": peran, "parts": [{"text": teks[:1500]}]})
+
+    isi.append({
+        "role": "user",
+        "parts": [{
+            "text": f"DATA PERPUSTAKAAN:\n{_konteks(pesan)}\n\n"
+                    f"Pertanyaan siswa: {pesan}"
+        }],
+    })
+    return isi
+
+
+def teks_bebas(perintah: str, sistem: str = ""):
+    """
+    Panggilan Gemini polos: tanpa persona pustakawan, tanpa konteks katalog.
+
+    Dipakai perkakas di luar chatbot, misalnya penyusun sinopsis. Memakai
+    jawab() untuk keperluan itu keliru — persona pustakawan memerintahkan
+    "jawab hanya dari data perpustakaan", sehingga model menolak menulis
+    apa pun dan selalu menjawab tidak tahu.
+    """
+    kunci = _kunci()
+    if not kunci:
+        return None
+
+    isi = {"contents": [{"role": "user", "parts": [{"text": perintah}]}],
+           "generationConfig": {"temperature": 0.4, "maxOutputTokens": 512,
+                                "thinkingConfig": {"thinkingBudget": 0}}}
+    if sistem:
+        isi["system_instruction"] = {"parts": [{"text": sistem}]}
+
+    permintaan = urllib.request.Request(
+        _URL.format(model=_model()),
+        data=json.dumps(isi).encode("utf-8"),
+        headers={"Content-Type": "application/json", "x-goog-api-key": kunci},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(permintaan, timeout=BATAS_DETIK) as balasan:
+            data = json.loads(balasan.read().decode("utf-8"))
+        potongan = data["candidates"][0]["content"]["parts"]
+        return ("".join(p.get("text", "") for p in potongan).strip()) or None
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError,
+            KeyError, IndexError, TypeError):
+        return None
+
+
+def jawab(pesan: str, riwayat=None):
     """
     Jawaban Gemini yang sudah ditambatkan, atau None.
 
@@ -166,12 +248,7 @@ def jawab(pesan: str):
 
     badan = json.dumps({
         "system_instruction": {"parts": [{"text": _PERAN}]},
-        "contents": [{
-            "parts": [{
-                "text": f"DATA PERPUSTAKAAN:\n{_konteks(pesan)}\n\n"
-                        f"Pertanyaan siswa: {pesan}"
-            }]
-        }],
+        "contents": _percakapan(pesan, riwayat),
         "generationConfig": {
             "temperature": 0.2,
             "maxOutputTokens": 512,

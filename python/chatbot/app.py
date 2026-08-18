@@ -53,8 +53,17 @@ PESAN_GAGAL = ("Maaf, asisten LIBRA sedang tidak bisa dihubungi. "
                "perpustakaan ya.")
 
 
+class Giliran(BaseModel):
+    peran: str          # "siswa" atau "libra"
+    teks: str
+
+
 class ChatRequest(BaseModel):
     message: str
+    # Riwayat dikirim klien, bukan disimpan server: ChatWidget sudah
+    # memegang seluruh percakapan di state-nya, dan layanan ini tetap
+    # tanpa sesi sehingga bisa dijalankan berapa pun prosesnya.
+    riwayat: list[Giliran] = []
 
     @field_validator('message')
     @classmethod
@@ -88,7 +97,7 @@ def chat():
     except ValidationError:
         return jsonify({"error": "message cannot be empty"}), 400
 
-    teks = gemini.jawab(req.message)
+    teks = gemini.jawab(req.message, [g.model_dump() for g in req.riwayat])
 
     return jsonify({
         "intent": "gemini",

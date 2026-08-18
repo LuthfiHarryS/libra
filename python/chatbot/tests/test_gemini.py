@@ -170,3 +170,45 @@ def test_konteks_tetap_jalan_saat_katalog_mati(monkeypatch):
     monkeypatch.setattr(gemini.katalog, 'buku_terpopuler',
                         lambda: (_ for _ in ()).throw(RuntimeError("db mati")))
     assert gemini._konteks("halo") == "(data katalog tidak terjangkau)"
+
+
+def test_riwayat_kosong_hanya_satu_giliran(monkeypatch):
+    monkeypatch.setattr(gemini, '_konteks', lambda p: "data")
+    isi = gemini._percakapan("halo", None)
+    assert len(isi) == 1
+    assert isi[0]['role'] == 'user'
+    assert "Pertanyaan siswa: halo" in isi[0]['parts'][0]['text']
+
+
+def test_riwayat_dipetakan_ke_peran_gemini(monkeypatch):
+    monkeypatch.setattr(gemini, '_konteks', lambda p: "data")
+    isi = gemini._percakapan("lanjut", [
+        {"peran": "siswa", "teks": "negeri 5 menara tentang apa"},
+        {"peran": "libra", "teks": "Bercerita tentang Alif."},
+    ])
+    assert [g['role'] for g in isi] == ['user', 'model', 'user']
+
+
+def test_riwayat_dipangkas(monkeypatch):
+    """Percakapan panjang tidak boleh membuat permintaan membengkak."""
+    monkeypatch.setattr(gemini, '_konteks', lambda p: "data")
+    banyak = [{"peran": "siswa", "teks": f"pesan {i}"} for i in range(30)]
+    isi = gemini._percakapan("terakhir", banyak)
+    assert len(isi) == gemini.MAKS_RIWAYAT + 1
+
+
+def test_giliran_kosong_dilewati(monkeypatch):
+    monkeypatch.setattr(gemini, '_konteks', lambda p: "data")
+    isi = gemini._percakapan("x", [
+        {"peran": "siswa", "teks": "   "},
+        {"peran": "libra", "teks": "ada isi"},
+    ])
+    assert len(isi) == 2
+
+
+def test_konteks_hanya_di_giliran_terakhir(monkeypatch):
+    """Data katalog tidak diulang tiap giliran — itu yang membuat boros."""
+    monkeypatch.setattr(gemini, '_konteks', lambda p: "PENANDA_KATALOG")
+    isi = gemini._percakapan("x", [{"peran": "siswa", "teks": "sebelumnya"}])
+    assert "PENANDA_KATALOG" not in isi[0]['parts'][0]['text']
+    assert "PENANDA_KATALOG" in isi[-1]['parts'][0]['text']
