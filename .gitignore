@@ -102,3 +102,6 @@ desktop.ini
 # ── Log ──
 *.log
 npm-debug.log*
+
+# Berkas yang disiapkan untuk diunggah manual ke Drive.
+kiriman_drive/
