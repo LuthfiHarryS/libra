@@ -198,18 +198,44 @@ def _percakapan(pesan: str, riwayat):
     return isi
 
 
-def teks_bebas(perintah: str, sistem: str = ""):
+def _jeda_disarankan(pesan: str, bawaan: float = 20.0) -> float:
     """
-    Panggilan Gemini polos: tanpa persona pustakawan, tanpa konteks katalog.
+    Detik tunggu yang disebutkan Gemini sendiri pada balasan 429.
+
+    Pesannya berbentuk "Please retry in 30.4s". Memakai angka dari server
+    lebih baik daripada menebak: menunggu terlalu sebentar hanya kena 429
+    lagi, terlalu lama membuang waktu.
+    """
+    import re
+    cocok = re.search(r'retry in ([0-9.]+)s', pesan)
+    if cocok:
+        try:
+            return min(float(cocok.group(1)) + 1, 90)
+        except ValueError:
+            pass
+    return bawaan
+
+
+def teks_bebas(perintah: str, sistem: str = "", percobaan: int = 3):
+    """
+    (teks, alasan). Panggilan Gemini polos: tanpa persona pustakawan dan
+    tanpa konteks katalog.
 
     Dipakai perkakas di luar chatbot, misalnya penyusun sinopsis. Memakai
     jawab() untuk keperluan itu keliru — persona pustakawan memerintahkan
     "jawab hanya dari data perpustakaan", sehingga model menolak menulis
     apa pun dan selalu menjawab tidak tahu.
+
+    Alasan dikembalikan terpisah supaya "kuota habis" tidak tercatat sama
+    seperti "model tidak tahu". Keduanya terlihat identik dari luar,
+    padahal yang satu berarti tunggu sebentar dan yang lain berarti
+    berhenti mencoba.
     """
+    import time as _waktu
+
     kunci = _kunci()
     if not kunci:
-        return None
+        return None, 'tanpa kunci'
 
     isi = {"contents": [{"role": "user", "parts": [{"text": perintah}]}],
            "generationConfig": {"temperature": 0.4, "maxOutputTokens": 512,
@@ -217,20 +243,30 @@ def teks_bebas(perintah: str, sistem: str = ""):
     if sistem:
         isi["system_instruction"] = {"parts": [{"text": sistem}]}
 
-    permintaan = urllib.request.Request(
-        _URL.format(model=_model()),
-        data=json.dumps(isi).encode("utf-8"),
-        headers={"Content-Type": "application/json", "x-goog-api-key": kunci},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(permintaan, timeout=BATAS_DETIK) as balasan:
-            data = json.loads(balasan.read().decode("utf-8"))
-        potongan = data["candidates"][0]["content"]["parts"]
-        return ("".join(p.get("text", "") for p in potongan).strip()) or None
-    except (urllib.error.URLError, TimeoutError, ValueError, OSError,
-            KeyError, IndexError, TypeError):
-        return None
+    for sisa in range(percobaan, 0, -1):
+        permintaan = urllib.request.Request(
+            _URL.format(model=_model()),
+            data=json.dumps(isi).encode("utf-8"),
+            headers={"Content-Type": "application/json", "x-goog-api-key": kunci},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(permintaan, timeout=BATAS_DETIK) as balasan:
+                data = json.loads(balasan.read().decode("utf-8"))
+            potongan = data["candidates"][0]["content"]["parts"]
+            teks = "".join(p.get("text", "") for p in potongan).strip()
+            return (teks or None), ('ok' if teks else 'balasan kosong')
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and sisa > 1:
+                _waktu.sleep(_jeda_disarankan(e.read().decode(errors='ignore')))
+                continue
+            return None, f'HTTP {e.code}'
+        except (urllib.error.URLError, TimeoutError, OSError):
+            return None, 'jaringan'
+        except (ValueError, KeyError, IndexError, TypeError):
+            return None, 'balasan tak terduga'
+
+    return None, 'kuota habis'
 
 
 def jawab(pesan: str, riwayat=None):

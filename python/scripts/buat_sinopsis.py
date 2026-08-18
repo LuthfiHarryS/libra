@@ -50,7 +50,10 @@ DB = dict(
     cursorclass=pymysql.cursors.DictCursor,
 )
 
-JEDA = 1.2
+# Batas gratis gemini-2.5-flash adalah 20 permintaan per menit. Jeda 4 detik
+# menahan laju di sekitar 15 per menit — cukup longgar agar tidak terus-menerus
+# kena 429, yang justru membuat keseluruhan proses lebih lambat.
+JEDA = 4.0
 TANDA_TIDAK_TAHU = 'TIDAK TAHU'
 
 PERINTAH = """Kamu pustakawan yang menulis sinopsis singkat untuk katalog
@@ -117,13 +120,15 @@ def main():
         print()
 
         terisi = tidak_tahu = gagal = 0
+        sebab = {}
         for i, b in enumerate(daftar, 1):
-            teks = gemini.teks_bebas(PERINTAH.format(**b))
+            teks, alasan = gemini.teks_bebas(PERINTAH.format(**b))
             time.sleep(JEDA)
 
             if not teks:
                 gagal += 1
-                print(f"[{i:>3}/{len(daftar)}] -- gagal      {b['judul'][:48]}")
+                sebab[alasan] = sebab.get(alasan, 0) + 1
+                print(f"[{i:>3}/{len(daftar)}] -- {alasan:<12} {b['judul'][:46]}")
                 continue
 
             bersih = teks.strip()
@@ -141,6 +146,13 @@ def main():
 
         print(f"\nTerisi {terisi}, dijawab tidak tahu {tidak_tahu}, gagal {gagal},"
               f" dari {len(daftar)} buku.")
+        if sebab:
+            print("Rincian kegagalan:")
+            for a, n in sorted(sebab.items(), key=lambda x: -x[1]):
+                print(f"  {a:<18} {n}")
+            if sebab.get('kuota habis'):
+                print("\n'kuota habis' berarti batas gratis Gemini tercapai,"
+                      " bukan buku yang bermasalah. Jalankan lagi nanti.")
         if tidak_tahu:
             print("Yang dijawab 'tidak tahu' sengaja dibiarkan kosong —"
                   " menunggu sinopsis dari petugas.")
