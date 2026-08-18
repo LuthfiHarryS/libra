@@ -63,6 +63,29 @@ def tersedia() -> bool:
     return bool(_kunci())
 
 
+def _uraikan(b: dict) -> str:
+    """
+    Satu buku sebagai kalimat data untuk Gemini.
+
+    Sinopsis ikut dikirim — tanpa itu pertanyaan "buku ini tentang apa"
+    tidak mungkin dijawab benar, karena modelnya tidak diberi bahannya
+    dan hanya bisa menebak dari judul.
+    """
+    bagian = [
+        f"{b['judul']} — penulis {b['penulis']}",
+        f"kategori {b.get('kategori_nama')}",
+        f"tersedia {b.get('stok_tersedia')} dari {b.get('stok_total')}",
+    ]
+    sinopsis = (b.get('sinopsis') or '').strip()
+    if sinopsis:
+        # Dipotong supaya beberapa buku sekaligus tetap muat dalam satu
+        # permintaan tanpa menenggelamkan pertanyaan siswanya.
+        bagian.append("sinopsis: " + sinopsis[:600])
+    else:
+        bagian.append("sinopsis belum tersedia di basis data")
+    return ", ".join(bagian)
+
+
 def _konteks(pesan: str) -> str:
     """
     Potongan data perpustakaan yang relevan dengan pesan.
@@ -100,12 +123,7 @@ def _konteks(pesan: str) -> str:
         try:
             baris = katalog.cari_judul(topik)
             if baris:
-                daftar = "; ".join(
-                    f"{b['judul']} — penulis {b['penulis']}, "
-                    f"kategori {b['kategori_nama']}, "
-                    f"tersedia {b['stok_tersedia']} dari {b['stok_total']}"
-                    for b in baris
-                )
+                daftar = "; ".join(_uraikan(b) for b in baris)
                 bagian.append(f"Judul yang cocok dengan '{topik}': {daftar}")
                 terpakai += 1
                 continue

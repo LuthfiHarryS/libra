@@ -163,7 +163,7 @@ def cari_judul(topik: str):
         with _conn() as c, c.cursor() as cur:
             cur.execute(
                 """SELECT b.judul, b.penulis, k.nama AS kategori_nama,
-                          b.stok_tersedia, b.stok_total
+                          b.stok_tersedia, b.stok_total, b.sinopsis
                    FROM buku b LEFT JOIN kategori k ON k.id = b.kategori_id
                    WHERE b.judul LIKE %s
                    ORDER BY CHAR_LENGTH(b.judul), b.judul
